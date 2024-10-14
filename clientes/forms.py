@@ -14,7 +14,7 @@ class ClienteForm(forms.ModelForm):
             'telefono': forms.TextInput(attrs={'class': 'form-control'}),
             'fecha_de_firma': forms.DateInput(attrs={'class': 'form-control', 'placeholder': 'DD de Mes de YYYY'}),
             'fecha_de_baja': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'DD-MMM'}),
-            'fecha_para_capturar_retiro': forms.DateInput(attrs={'class': 'form-control', 'placeholder': 'DD de Mes de YYYY'}),
+            'fecha_para_capturar_retiro': forms.DateInput(attrs={'class': 'form-control','type': 'date', 'placeholder': 'DD de Mes de YYYY'}),
             'observaciones': forms.TextInput(attrs={'class': 'form-control', 'rows': 2}),
             'direccion': forms.TextInput(attrs={'class': 'form-control', 'rows': 3}),
             'colonia': forms.TextInput(attrs={'class': 'form-control'}),

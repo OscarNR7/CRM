@@ -18,7 +18,7 @@ class Cliente(models.Model):
     fecha_de_firma = models.DateField(null=True ,blank=True, help_text="Fecha de Firma")
     fecha_de_baja = models.DateField(null=True, blank=True, help_text="Fecha de Baja")
     fecha_para_capturar_retiro = models.DateField(null=True,blank = True,help_text="Fecha para capturar retiro")
-    observaciones = models.TextField(verbose_name="referencia",null=True, blank=True,help_text="Observaciones del cliente")
+    observaciones = models.TextField(verbose_name="observaciones",null=True, blank=True,help_text="Observaciones del cliente")
     alta = models.CharField(max_length=100, null=True, blank=True,help_text="Alta")
     vendedor = models.ForeignKey(Vendedor, on_delete=models.CASCADE, null=True,help_text="Vendedor al que pertenece el cliente")
     rcv = models.CharField(max_length=50,null=True,blank=True,help_text="RCV")
