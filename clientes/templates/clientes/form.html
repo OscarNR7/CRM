@@ -1,0 +1,21 @@
+<form enctype="multipart/form-data" method="POST">
+    {% csrf_token %}
+    {% for campo in formulario %}
+        <div class="mb-3">
+            <label for="" class="form-label">{{ campo.label }}:</label>
+
+           
+            {% if campo.field.widget.input_type == 'file' and campo.value %}
+                <br>
+                <img src="{{ campo.value.url }}" width="80" alt="Foto del cliente">
+                <br>
+            {% endif %}
+
+            {{ campo }}
+
+            <div class="text-danger">{{ campo.errors }}</div>
+        </div>
+    {% endfor %}
+    <input class="btn btn-success" type="submit" value="Enviar Datos">
+    <a class="btn btn-primary" href="{% url 'clientes' %}" role="button">Cancelar</a>
+</form>
