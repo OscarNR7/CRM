@@ -1,5 +1,5 @@
 from django import forms
-from .models import Cliente
+from .models import *
 from django.core.exceptions import ValidationError
 from datetime import datetime
 
@@ -22,4 +22,12 @@ class ClienteForm(forms.ModelForm):
             'vendedor': forms.Select(attrs={'class': 'form-control'}),
             'rcv': forms.TextInput(attrs={'class': 'form-control'}),
             'fotografia': forms.ClearableFileInput(attrs={'class': 'form-control'}),
+        }
+
+class VendedorForm(forms.ModelForm):
+    class Meta:
+        model = Vendedor
+        fields = ['nombre']
+        widgets = {
+            'nombre': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Nombre del Vendedor'})
         }

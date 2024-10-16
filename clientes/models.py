@@ -3,7 +3,8 @@ from django.db import models
 from datetime import timedelta
 
 class Vendedor(models.Model):
-    nombre = models.CharField(max_length=100, help_text="Nombre del Vendedor")
+    id = models.AutoField(primary_key=True)
+    nombre = models.CharField(max_length=100)
 
     def __str__(self):
         return self.nombre

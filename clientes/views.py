@@ -9,9 +9,10 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db import IntegrityError
 from django.db.models import Q
+from django.contrib import messages
 from django.views.generic import TemplateView, ListView, UpdateView, DeleteView, CreateView
 from .models import Cliente
-from .forms import ClienteForm
+from .forms import ClienteForm, VendedorForm
 from usuarios.models import UserRole
 from usuarios.decorators import gerente_required, administrador_required
 
@@ -37,6 +38,11 @@ class ListarClientes(LoginRequiredMixin,ListView):
     template_name = 'clientes/clientes.html'
     context_object_name = 'clientes'
     paginate_by = 10
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['vendedor_form'] = VendedorForm()
+        return context
     def get_queryset(self):
         '''
             
@@ -107,7 +113,20 @@ class EliminarCliente(LoginRequiredMixin,DeleteView):
         return super().delete(request, *args, **kwargs)
 
 #------------------------------------------------LOGIN----------------------------------------------------------------
+def agregar_vendedor(request):
+    '''
+        Agrega un nuevo vendedor a la base de datos.
+        Args: request (HttpRequest): peticion HTTP.
+    '''
+    if request.method == 'POST':
+        vendedor_form = VendedorForm(request.POST)
+        if vendedor_form.is_valid():
+            vendedor_form.save()
+            messages.success(request, "Vendedor agregado exitosamente.")  
+            return redirect('clientes')  
+    else:
+        vendedor_form = VendedorForm()
 
-#Funcion para registrar un usuario al sistema
+    return render(request, 'vendedores/agregar.html', {'vendedor_form': vendedor_form})  
 
 
