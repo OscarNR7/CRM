@@ -31,3 +31,16 @@ class VendedorForm(forms.ModelForm):
         widgets = {
             'nombre': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Nombre del Vendedor'})
         }
+
+
+class PagoForm(forms.ModelForm):
+    class Meta:
+        model = Pago
+        fields = ['fecha_de_pago', 'cancelacion', 'cantidad', 'anticipo', 'observaciones']
+        widgets = {
+            'fecha_de_pago': forms.TextInput(attrs={'type': 'date','class': 'form-control'}),
+            'cancelacion': forms.TextInput(attrs={'class': 'form-control'}),
+            'cantidad': forms.TextInput(attrs={'class': 'form-control'}),
+            'anticipo': forms.TextInput(attrs={'class': 'form-control'}),
+            'observaciones': forms.TextInput(attrs={'class': 'form-control', 'rows': 2}),
+        }

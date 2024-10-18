@@ -110,3 +110,6 @@ def signin(request):
             login(request, user)
             return redirect('home')
     
+def profile(request):
+    usuario = User.objects.all()
+    return render(request, 'usuarios/profile.html', {'usuarios': usuario})

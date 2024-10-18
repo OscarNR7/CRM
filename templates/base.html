@@ -26,20 +26,23 @@
             <div class="container-fluid me-auto">
                 <div class="nav navbar-nav">
                     <a class="nav-link active" href="{% url 'home' %}">HOME</a>
-                    <a class="nav-link active" href="{% url 'clientes' %}">Clientes</a>
-                    {% if user.is_authenticated and user.userrole.role == 'gerente' %}
-                    <a class="nav-link active" href="{% url 'administrar_usuarios' %}">Administrar Usuarios</a>
-                    {% endif %}
                     {% if user.is_authenticated %}
-                    <a class="nav-link active">Rol del usuario: {{ user.userrole.role }}</a>
+                        <a class="nav-link active" href="{% url 'clientes' %}">Clientes</a>
+                        {% if user.userrole.role == 'gerente' %}
+                        <a class="nav-link active" href="{% url 'administrar_usuarios' %}">Administrar Usuarios</a>
+                        <a class="nav-link active" href="{% url 'pagos' %}">Pagos</a>
+                        {% endif %}
+                        <a class="nav-link active">Rol del usuario: {{ user.userrole.role }}</a>
                     {% endif %}
                 </div>
+                
+                <!-- Login y Perfil del usuario -->
                 <div class="navbar-nav ms-auto">
-                    <!-- signup es provisional -->
                     {% if user.is_authenticated  %}
+                    <a class="nav-link active" href="{% url 'perfil' %}">Perfil</a>
                     <a class="nav-link active" href="{% url 'logout' %}">Cerrar Sesion</a>
                     {% else %}
-                    <a class="nav-link active" href="{% url 'signup' %}">Registrarse</a>
+                    <!-- <a class="nav-link active" href="{% url 'signup' %}">Registrarse</a> -->
                     <a class="nav-link active" href="{% url 'signin' %}">Iniciar Sesion</a>
                     {% endif %}
                 </div>

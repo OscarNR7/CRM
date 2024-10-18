@@ -48,7 +48,7 @@
                                 <td>{{ cliente.fecha_de_baja|date:"d-M"}}</td>
                                 <td>{{ cliente.fecha_para_capturar_retiro}}</td>
                                 <td><span class="d-inline-block text-truncate" style="max-width: 100px;">{{ cliente.observaciones }}</span></td>
-                                <td>{{ cliente.alta|yesno:"Sí,No" }}</td>
+                                <td>{{ cliente.alta}}</td>
                                 <td>{{ cliente.vendedor }}</td>
                                 <td>{{ cliente.rcv }}</td>
                                 <td><span class="d-inline-block text-truncate" style="max-width: 100px;">{{ cliente.direccion }}</span></td>
@@ -107,11 +107,10 @@
                                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                             </div>
                             <div class="modal-body">
-                                {% include 'clientes/vendedor_modal_content.html' %}
+                                {% include 'vendedores/vendedor_modal_content.html' %}
                             </div>
                         </div>
                     </div>
-                </div>
                 </div>
             {% endif %}
         </div>
