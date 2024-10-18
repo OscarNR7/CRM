@@ -70,39 +70,78 @@
                         {% endfor %}
                     </tbody>
                 </table>   
+                <div class="pagination">
+                    <span class="step-links">
+                        {% if page_obj.has_previous %}
+                            <a href="?page=1">&laquo; primera</a>
+                            <a href="?page={{ page_obj.previous_page_number }}">anterior</a>
+                        {% endif %}
+                
+                        <span class="current">
+                            Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}.
+                        </span>
+                
+                        {% if page_obj.has_next %}
+                            <a href="?page={{ page_obj.next_page_number }}">siguiente</a>
+                            <a href="?page={{ page_obj.paginator.num_pages }}">última &raquo;</a>
+                        {% endif %}
+                    </span>
+                </div>
             </div>
             {% if user.is_authenticated and user.userrole.role == 'gerente' or user.userrole.role == 'administrador' %}     
                 <div class="mt-3">
-                    <a class="btn btn-success" href="{% url 'agregar' %}">Agregar Cliente</a>
+                    <a class="btn btn-success" href="{% url 'agregar' %}">Agregar un Cliente</a>
                 </div>
                 <br>
-                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#agregarVendedorModal">
-                    Agregar Vendedor
+                <!-- Botón para abrir el modal de vendedores -->
+                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#vendedorModal">
+                    Ver Vendedores
                 </button>
-                <div class="modal fade" id="agregarVendedorModal" tabindex="-1" aria-labelledby="agregarVendedorModalLabel" aria-hidden="true">
+
+                <!-- Modal para mostrar la tabla de vendedores -->
+                <div class="modal fade" id="vendedorModal" tabindex="-1" aria-labelledby="vendedorModalLabel" aria-hidden="true">
                     <div class="modal-dialog">
                         <div class="modal-content">
                             <div class="modal-header">
-                                <h5 class="modal-title" id="agregarVendedorModalLabel">Agregar Vendedor</h5>
+                                <h5 class="modal-title" id="vendedorModalLabel">Lista de Vendedores</h5>
                                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                             </div>
                             <div class="modal-body">
-                                <form method="POST" action="{% url 'agregar_vendedor' %}">
-                                    {% csrf_token %}
-                                    <div class="mb-3">
-                                        {{ vendedor_form.as_p}}
-                                    </div>
-                                    <button type="submit" class="btn btn-success">Guardar</button>
-                                </form>
+                                {% include 'clientes/vendedor_modal_content.html' %}
                             </div>
                         </div>
                     </div>
+                </div>
                 </div>
             {% endif %}
         </div>
     </div>
 </div>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+    const vendedorModal = document.getElementById('vendedorModal');
+    
+    vendedorModal.addEventListener('click', function(e) {
+        if (e.target.classList.contains('vendedor-page-link')) {
+            e.preventDefault();
+            const page = e.target.getAttribute('data-page');
+            fetch(`?vendedor_page=${page}`, {
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => response.text())
+            .then(html => {
+                vendedorModal.querySelector('.modal-body').innerHTML = html;
+            });
+        }
+    });
+});
+</script>
 {% endblock %}
+
+
+
 
 <style>
     .table th, .table td {

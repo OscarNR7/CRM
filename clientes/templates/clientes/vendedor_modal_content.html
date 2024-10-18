@@ -1,0 +1,42 @@
+<!-- Tabla de vendedores -->
+<table class="table">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Nombre</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for vendedor in vendedores %}
+            <tr>
+                <td>{{ vendedor.id }}</td>
+                <td>{{ vendedor.nombre }}</td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
+<div class="pagination">
+    <span class="step-links">
+        {% if vendedores.has_previous %}
+            <a href="#" class="vendedor-page-link" data-page="1">&laquo; primera</a>
+            <a href="#" class="vendedor-page-link" data-page="{{ vendedores.previous_page_number }}">anterior</a>
+        {% endif %}
+
+        <span class="current">
+            Página {{ vendedores.number }} de {{ vendedores.paginator.num_pages }}.
+        </span>
+
+        {% if vendedores.has_next %}
+            <a href="#" class="vendedor-page-link" data-page="{{ vendedores.next_page_number }}">siguiente</a>
+            <a href="#" class="vendedor-page-link" data-page="{{ vendedores.paginator.num_pages }}">última &raquo;</a>
+        {% endif %}
+    </span>
+</div>
+<form method="POST" action="{% url 'agregar_vendedor' %}">
+    {% csrf_token %}
+    <p>Agregar Vendedor</p>
+    <div class="mb-3">
+        {{ vendedor_form.as_p }}
+    </div>
+    <button type="submit" class="btn btn-success">Guardar</button>
+</form>

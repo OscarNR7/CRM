@@ -11,5 +11,6 @@ urlpatterns = [
     path('clientes/eliminar/<int:pk>', EliminarCliente.as_view(), name = 'eliminar'),
     path('clientes/editar/<int:id>', views.editar_cliente, name = 'editar'),
     path('agregar-vendedor/', views.agregar_vendedor, name = 'agregar_vendedor'),
+    path('listar-vendedores/',ListarVendedores.as_view(), name = 'lista_vendedores')
 
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)  

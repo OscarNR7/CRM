@@ -11,10 +11,13 @@ from django.db import IntegrityError
 from django.db.models import Q
 from django.contrib import messages
 from django.views.generic import TemplateView, ListView, UpdateView, DeleteView, CreateView
-from .models import Cliente
+from .models import *
+from django.http import HttpResponse
+from django.template.loader import render_to_string
 from .forms import ClienteForm, VendedorForm
 from usuarios.models import UserRole
 from usuarios.decorators import gerente_required, administrador_required
+from django.core.paginator import Paginator
 
 
 # Create your views here.
@@ -42,7 +45,14 @@ class ListarClientes(LoginRequiredMixin,ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['vendedor_form'] = VendedorForm()
+        
+
+        vendedores = Vendedor.objects.all()
+        vendedor_paginator = Paginator(vendedores, 5)
+        vendedor_page = self.request.GET.get('vendedor_page')
+        context['vendedores'] = vendedor_paginator.get_page(vendedor_page)
         return context
+    
     def get_queryset(self):
         '''
             
@@ -60,6 +70,14 @@ class ListarClientes(LoginRequiredMixin,ListView):
                 
             cliente = cliente.filter(search_filters)
         return cliente
+    
+    def get(self, request, *args, **kwargs):
+        self.object_list = self.get_queryset()
+        context = self.get_context_data()
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            html = render_to_string('clientes/vendedor_modal_content.html', context, request=request)
+            return HttpResponse(html)
+        return super().get(request, *args, **kwargs)
 
 #funcion para agregar un nuevo cliente
 @login_required
@@ -121,12 +139,20 @@ def agregar_vendedor(request):
     if request.method == 'POST':
         vendedor_form = VendedorForm(request.POST)
         if vendedor_form.is_valid():
-            vendedor_form.save()
-            messages.success(request, "Vendedor agregado exitosamente.")  
+            vendedor_form.save() 
             return redirect('clientes')  
     else:
         vendedor_form = VendedorForm()
 
-    return render(request, 'vendedores/agregar.html', {'vendedor_form': vendedor_form})  
+    return render(request, 'vendedores/clientes.html', {'vendedor_form': vendedor_form})  
 
-
+class ListarVendedores(ListView):
+    '''
+        Lista todos los vendedores existentes en la base de datos.
+        Args: request (HttpRequest): peticion HTTP.
+    '''
+    model = Vendedor
+    template_name = 'vendedores/clientes.html'
+    context_object_name = 'vendedores'
+    paginate_by = 10
+    
