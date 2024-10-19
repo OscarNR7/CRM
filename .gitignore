@@ -8,7 +8,7 @@ db.sqlite3
 media/
 staticfiles/
 venv
-
+clientes/fotos/
 # Virtual environment
 venv/
 env/
