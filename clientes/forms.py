@@ -18,7 +18,7 @@ class ClienteForm(forms.ModelForm):
             'observaciones': forms.TextInput(attrs={'class': 'form-control', 'rows': 2}),
             'direccion': forms.TextInput(attrs={'class': 'form-control', 'rows': 3}),
             'colonia': forms.TextInput(attrs={'class': 'form-control'}),
-            'alta': forms.TextInput(attrs={'class': 'form-control'}),
+            'alta': forms.TextInput(attrs={'class': 'form-control'}),           
             'vendedor': forms.Select(attrs={'class': 'form-control'}),
             'rcv': forms.TextInput(attrs={'class': 'form-control'}),
             'fotografia': forms.ClearableFileInput(attrs={'class': 'form-control'}),
@@ -30,4 +30,17 @@ class VendedorForm(forms.ModelForm):
         fields = ['nombre']
         widgets = {
             'nombre': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Nombre del Vendedor'})
+        }
+
+
+class PagoForm(forms.ModelForm):
+    class Meta:
+        model = Pago
+        fields = ['fecha_de_pago', 'cancelacion', 'cantidad', 'anticipo', 'observaciones']
+        widgets = {
+            'fecha_de_pago': forms.TextInput(attrs={'type': 'date','class': 'form-control'}),
+            'cancelacion': forms.TextInput(attrs={'class': 'form-control'}),
+            'cantidad': forms.TextInput(attrs={'class': 'form-control'}),
+            'anticipo': forms.TextInput(attrs={'class': 'form-control'}),
+            'observaciones': forms.TextInput(attrs={'class': 'form-control', 'rows': 2}),
         }

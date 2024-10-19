@@ -10,7 +10,7 @@ class Vendedor(models.Model):
         return self.nombre
 
 class Cliente(models.Model):
-    # Definición de los campos para almacenar la información de los clientes
+    #Definición de los campos para almacenar la información de los clientes
     id = models.AutoField(primary_key=True)
     nombre = models.CharField(max_length=255, help_text="Nombre del cliente")
     curp = models.CharField(max_length=100, unique=True,  help_text="Clave Única de Registro de Población (CURP)")
@@ -52,4 +52,21 @@ class Cliente(models.Model):
         verbose_name = 'Cliente'
         verbose_name_plural = 'Clientes'
 
-    
+class Pago(models.Model):
+    cliente = models.ForeignKey(Cliente, on_delete=models.CASCADE, related_name='pagos')
+    fecha_de_pago = models.DateField(null=True, blank=True)
+    cancelacion = models.CharField(max_length=50,blank=True, null=True)
+    cantidad = models.DecimalField(max_digits=10, decimal_places=2)
+    porcentaje = models.DecimalField(max_digits=5, decimal_places=2)
+    anticipo = models.DecimalField(max_digits=10, decimal_places=2)
+    observaciones = models.TextField(blank=True, null=True)
+
+    def save(self, *args, **kwargs):
+        if self.cantidad == 2500:
+            self.porcentaje = 100
+        else:
+            self.porcentaje = (self.cantidad / 2500) * 100
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"Pago de {self.cliente.nombre} - {self.cliente.fecha_de_firma}"

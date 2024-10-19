@@ -1,0 +1,67 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block titulo %}Pagos{% endblock %}
+
+{% block content %}
+    <h1>Pagos por Vendedor</h1>
+    
+    <form method="get" action="{% url 'pagos' %}">
+        <label for="vendedor">Selecciona un Vendedor:</label>
+        <select name="vendedor" id="vendedor">
+            <option value="">-- Selecciona un vendedor --</option>
+            {% for vendedor in vendedores %}
+                <option value="{{ vendedor.id }}" {% if vendedor_seleccionado.id == vendedor.id %}selected{% endif %}>
+                    {{ vendedor.nombre }}
+                </option>
+            {% endfor %}
+        </select>
+        <button type="submit">Ver Clientes</button>
+    </form>
+    
+    {% if vendedor_seleccionado %}
+        <h2>Vendedor: {{ vendedor_seleccionado.nombre }}</h2>
+        
+        {% for semana, clientes in pagos_por_semana.items %}
+            <h3>Semana {{ semana }}</h3>
+            <table class="table">
+                <thead class="thead-dark">
+                    <tr>
+                        <th>Nombre del Cliente</th>
+                        <th>Fecha de Firma</th>
+                        <th>46 Días</th>
+                        <th>Observaciones</th>
+                        <th>Fecha de Pago</th>
+                        <th>Cancelación</th>
+                        <th>Cantidad</th>
+                        <th>Porcentaje</th>
+                        <th>Anticipo</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in clientes %}
+                        <tr>
+                            <td>{{ item.cliente.nombre }}</td>
+                            <td>{{ item.cliente.fecha_de_firma }}</td>
+                            <td>{{ item.cliente.fecha_para_capturar_retiro }}</td>
+                            <td>{{ item.pago.observaciones|default:"-" }}</td>
+                            <td>{{ item.pago.fecha_de_pago|default:"-" }}</td>
+                            <td>{{ item.pago.cancelacion|default:"-" }}</td>
+                            <td>{{ item.pago.cantidad|default:"-" }}</td>
+                            <td>{{ item.pago.porcentaje|default:"-" }}%</td>
+                            <td>{{ item.pago.anticipo|default:"-" }}</td>
+                            <td>
+                                <a href="{% url 'agregar_editar_pago' cliente_id=item.cliente.id vendedor_id=vendedor_seleccionado.id %}" class="btn btn-primary">
+                                    Agregar o Editar Pagos
+                                </a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% endfor %}
+    {% else %}
+        <p>Selecciona un vendedor para ver los clientes.</p>
+    {% endif %}
+{% endblock %}

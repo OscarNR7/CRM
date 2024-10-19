@@ -1,0 +1,37 @@
+/* Ocultar scrollbar */
+::-webkit-scrollbar {
+    display: none;
+}
+
+/* Estilo general */
+* {
+    margin: 0;
+    font-family: "Lexend Deca", sans-serif;
+}
+
+/* Navbar personalizada */
+.navbar {
+    background-color: black;
+}
+
+/* Estilo del enlace HOME más grande */
+.nav-home {
+    font-size: 24px; /* Cambia este valor para ajustar el tamaño */
+    font-weight: bold;
+    color: white !important;
+}
+
+/* Estilo para los otros enlaces de la barra de navegación */
+.nav-link {
+    color: white !important;
+}
+
+/* Espaciado entre los elementos de la barra de navegación */
+.navbar-nav .nav-item {
+    margin-left: 15px;
+}
+
+/* Cambiar el color del botón en estado hover */
+.nav-link:hover {
+    color: #ccc !important;
+}
