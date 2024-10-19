@@ -1,0 +1,35 @@
+::-webkit-scrollbar {
+    display: none;
+    }
+
+    *{
+        margin: 0px;
+        font-family: "Lexend Deca",sans-serif;
+    }
+
+    .nav{
+        background-color: black;
+        height: fit-content;
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .nav a{
+        text-decoration: none;
+        color: white;
+    }
+
+    .nav h1{
+        font-family: "Lexend Deca", sans-serif;
+        font-size: 40px;
+    }
+
+    .logC a{
+        background-color: red;
+    }
+    #navOpc{
+        display: flex;
+        flex-direction: row;
+    }
