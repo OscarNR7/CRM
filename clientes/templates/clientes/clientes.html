@@ -2,140 +2,189 @@
 {% block titulo %}Clientes{% endblock %}
 {% block content %}
 <div class="container-fluid mt-4">
-    <div class="card">
-        <div class="card-header">
-            <h2 class="mb-0">Lista de Clientes</h2>
-            <form method="GET" action="{% url 'clientes' %}" class="d-flex mt-3" role="search">
-                <input class="form-control me-2" type="search" placeholder="Buscar clientes..." 
-                name="search" aria-label="Search" value="">
-                <button class="btn btn-outline-primary" type="submit">Buscar</button>
-            </form>
-        </div>
-        <div class="card-body">
-            <div class="table-responsive">
-                <table class="table">
-                    <thead class="thead-dark">
-                        <tr>
-                            <th>ID</th>
-                            <th>Nombre</th>
-                            <th>CURP</th>
-                            <th>NSS</th>
-                            <th>Tel</th>
-                            <th>Fecha de Firma</th>
-                            <th>Fecha de Baja</th>
-                            <th>Fecha Para CapturarRetiro</th>
-                            <th>Observaciones</th>
-                            <th>Alta</th>
-                            <th>Vendedor</th>
-                            <th>RCV</th>
-                            <th>Dirección</th>
-                            <th>Colonia</th>
-                            <th>Foto</th>
-                            {% if user.is_authenticated and user.userrole.role == 'gerente' or user.userrole.role == 'administrador' %}
-                                <th>Acciones</th>
-                            {% endif %}
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for cliente in clientes %}
-                            <tr>
-                                <td>{{ cliente.id }}</td>
-                                <td>{{ cliente.nombre }}</td>
-                                <td>{{ cliente.curp }}</td>
-                                <td>{{ cliente.nss }}</td>
-                                <td>{{ cliente.telefono }}</td>
-                                <td>{{ cliente.fecha_de_firma}}</td>
-                                <td>{{ cliente.fecha_de_baja|date:"d-M"}}</td>
-                                <td>{{ cliente.fecha_para_capturar_retiro}}</td>
-                                <td><span class="d-inline-block text-truncate" style="max-width: 100px;">{{ cliente.observaciones }}</span></td>
-                                <td>{{ cliente.alta}}</td>
-                                <td>{{ cliente.vendedor }}</td>
-                                <td>{{ cliente.rcv }}</td>
-                                <td><span class="d-inline-block text-truncate" style="max-width: 100px;">{{ cliente.direccion }}</span></td>
-                                <td>{{ cliente.colonia }}</td>
-                                <td>
-                                    {% if cliente.fotografia %}
-                                        <img src="{{ cliente.fotografia.url }}" class="img-thumbnail" alt="Foto de {{ cliente.nombre }}" style="max-width: 50px; max-height: 50px;">
-                                    {% else %}
-                                        <span class="text-muted">N/A</span>
+    <div class="row">
+        <!-- Columna principal con la tabla de clientes -->
+        <div class="col-12" id="contenedor-tabla">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="mb-0">Lista de Clientes</h2>
+                    <form method="GET" action="{% url 'clientes' %}" class="d-flex mt-3" role="search">
+                        <input class="form-control me-2" type="search" placeholder="Buscar clientes..." 
+                        name="search" aria-label="Search" value="">
+                        <button class="btn btn-outline-primary" type="submit">Buscar</button>
+                    </form>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead class="thead-dark">
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Nombre</th>
+                                    <th>CURP</th>
+                                    <th>NSS</th>
+                                    <th>Tel</th>
+                                    <th>Vendedor</th>
+                                    {% if user.is_authenticated and user.userrole.role == 'gerente' or user.userrole.role == 'administrador' %}
+                                        <th>Acciones</th>
                                     {% endif %}
-                                </td>
-                                {% if user.is_authenticated and user.userrole.role == 'gerente' or user.userrole.role == 'administrador' %}
-                                    <td>
-                                        <a class="btn btn-sm btn-info" href="{% url 'editar' cliente.id %}">E</a>
-                                        <a class="btn btn-sm btn-danger" href="{% url 'eliminar' cliente.id %}">X</a>
-                                    </td>   
+                                    <th>Informacion Extra</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for cliente in clientes %}
+                                    <tr>
+                                        <td>{{ cliente.id }}</td>
+                                        <td>{{ cliente.nombre }}</td>
+                                        <td>{{ cliente.curp }}</td>
+                                        <td>{{ cliente.nss }}</td>
+                                        <td>{{ cliente.telefono }}</td>
+                                        <td>{{ cliente.vendedor }}</td>
+                                        </td>
+                                        {% if user.is_authenticated and user.userrole.role == 'gerente' or user.userrole.role == 'administrador' %}
+                                            <td>
+                                                <a class="btn btn-sm btn-info" href="{% url 'editar' cliente.id %}">E</a>
+                                                <a class="btn btn-sm btn-danger" href="{% url 'eliminar' cliente.id %}">X</a>
+                                            </td>   
+                                        {% endif %}
+                                        <td>
+                                            <button type="button" class="btn btn-primary btn-mostrar" data-id="{{ cliente.id }}">
+                                                mostrar
+                                            </button>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>   
+                        <!-- Paginación -->
+                        <div class="pagination">
+                            <span class="step-links">
+                                {% if page_obj.has_previous %}
+                                    <a href="?page=1">&laquo; primera</a>
+                                    <a href="?page={{ page_obj.previous_page_number }}">anterior</a>
                                 {% endif %}
-                            </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>   
-                <div class="pagination">
-                    <span class="step-links">
-                        {% if page_obj.has_previous %}
-                            <a href="?page=1">&laquo; primera</a>
-                            <a href="?page={{ page_obj.previous_page_number }}">anterior</a>
-                        {% endif %}
-                
-                        <span class="current">
-                            Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}.
-                        </span>
-                
-                        {% if page_obj.has_next %}
-                            <a href="?page={{ page_obj.next_page_number }}">siguiente</a>
-                            <a href="?page={{ page_obj.paginator.num_pages }}">última &raquo;</a>
-                        {% endif %}
-                    </span>
-                </div>
-            </div>
-            {% if user.is_authenticated and user.userrole.role == 'gerente' or user.userrole.role == 'administrador' %}     
-                <div class="mt-3">
-                    <a class="btn btn-success" href="{% url 'agregar' %}">Agregar un Cliente</a>
-                </div>
-                <br>
-                <!-- Botón para abrir el modal de vendedores -->
-                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#vendedorModal">
-                    Ver Vendedores
-                </button>
-
-                <!-- Modal para mostrar la tabla de vendedores -->
-                <div class="modal fade" id="vendedorModal" tabindex="-1" aria-labelledby="vendedorModalLabel" aria-hidden="true">
-                    <div class="modal-dialog">
-                        <div class="modal-content">
-                            <div class="modal-header">
-                                <h5 class="modal-title" id="vendedorModalLabel">Lista de Vendedores</h5>
-                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                            </div>
-                            <div class="modal-body">
-                                {% include 'vendedores/vendedor_modal_content.html' %}
-                            </div>
+                        
+                                <span class="current">
+                                    Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}.
+                                </span>
+                        
+                                {% if page_obj.has_next %}
+                                    <a href="?page={{ page_obj.next_page_number }}">siguiente</a>
+                                    <a href="?page={{ page_obj.paginator.num_pages }}">última &raquo;</a>
+                                {% endif %}
+                            </span>
                         </div>
                     </div>
+                        {% if user.is_authenticated and user.userrole.role == 'gerente' or user.userrole.role == 'administrador' %}     
+                            <div class="mt-3">
+                                <a class="btn btn-success" href="{% url 'agregar' %}">Agregar un Cliente</a>
+                            </div>
+                            <br>
+                        {% endif %}
                 </div>
-            {% endif %}
+            </div>
+        </div>
+
+        <!-- Cuadro de información del cliente -->
+        <div id="cuadro-informacion-cliente" class="position-fixed shadow" 
+             style="width: 40%; top: 20px; right: 20px; display: none; z-index: 1000; max-height: 90vh; overflow-y: auto;">
+            {% include 'clientes/informacion_cliente.html' %}
         </div>
     </div>
 </div>
+
+<!-- Agregamos estilos específicos -->
+<style>
+    @media (max-width: 768px) {
+        #cuadro-informacion-cliente {
+            width: 90% !important;
+            top: 50% !important;
+            left: 50% !important;
+            transform: translate(-50%, -50%) !important;
+        }
+    }
+
+    #cuadro-informacion-cliente {
+        background-color: white;
+        border-radius: 8px;
+        box-shadow: 0 0 15px rgba(0,0,0,0.1);
+    }
+
+    /* Añade un efecto de overlay cuando el cuadro está visible */
+    .overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: rgba(0,0,0,0.5);
+        z-index: 999;
+        display: none;
+    }
+</style>
+
+<!-- Actualizamos el JavaScript -->
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-    const vendedorModal = document.getElementById('vendedorModal');
-    
-    vendedorModal.addEventListener('click', function(e) {
-        if (e.target.classList.contains('vendedor-page-link')) {
-            e.preventDefault();
-            const page = e.target.getAttribute('data-page');
-            fetch(`?vendedor_page=${page}`, {
-                headers: {
-                    'X-Requested-With': 'XMLHttpRequest'
-                }
-            })
-            .then(response => response.text())
-            .then(html => {
-                vendedorModal.querySelector('.modal-body').innerHTML = html;
-            });
+        const botonesMostrar = document.querySelectorAll('.btn-mostrar');
+        const cuadroInfo = document.getElementById('cuadro-informacion-cliente');
+        let overlay;
+
+        // Crear el overlay
+        function createOverlay() {
+            overlay = document.createElement('div');
+            overlay.className = 'overlay';
+            document.body.appendChild(overlay);
         }
+        createOverlay();
+
+        // Función para cerrar el cuadro de información
+        function cerrarCuadroInfo() {
+            cuadroInfo.style.display = 'none';
+            overlay.style.display = 'none';
+            cuadroInfo.innerHTML = ''; // Limpia el contenido
+        }
+
+        // Manejar el evento de mostrar el cuadro de información
+        botonesMostrar.forEach(boton => {
+            boton.addEventListener('click', function() {
+                const clienteId = this.getAttribute('data-id');
+
+                fetch(`/clientes/${clienteId}/informacion/`, {
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                })
+                .then(response => response.text())
+                .then(html => {
+                    cuadroInfo.innerHTML = html;
+                    cuadroInfo.style.display = 'block';
+                    overlay.style.display = 'block';
+
+                    // Añadir evento para cerrar el cuadro de información
+                    const botonCerrar = document.getElementById('btn-cerrar-cuadro');
+                    if (botonCerrar) {
+                        botonCerrar.addEventListener('click', cerrarCuadroInfo);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error al cargar la información:', error);
+                });
+            });
+        });
+
+        // Cerrar al hacer clic en el overlay
+        overlay.addEventListener('click', cerrarCuadroInfo);
+
+        // Cerrar con la tecla Escape
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape' && cuadroInfo.style.display === 'block') {
+                cerrarCuadroInfo();
+            }
+        });
     });
-});
 </script>
 {% endblock %}
+
+
 

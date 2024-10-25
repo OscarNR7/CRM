@@ -14,5 +14,6 @@ urlpatterns = [
     path('listar-vendedores/',ListarVendedores.as_view(), name = 'lista_vendedores'),
     path('pagos/', views.PagosClientes.as_view(), name='pagos'),
     path('pago/<int:cliente_id>/<int:vendedor_id>/', views.agregar_editar_pago, name='agregar_editar_pago'),
+    path('clientes/<int:cliente_id>/informacion/', views.informacion_cliente, name = 'informacion')
 
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)  

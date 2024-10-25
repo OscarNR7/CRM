@@ -143,11 +143,11 @@ def agregar_vendedor(request):
         vendedor_form = VendedorForm(request.POST)
         if vendedor_form.is_valid():
             vendedor_form.save() 
-            return redirect('clientes')  
+            return redirect('pagos')  
     else:
         vendedor_form = VendedorForm()
 
-    return render(request, 'vendedores/clientes.html', {'vendedor_form': vendedor_form})  
+    return render(request, 'vendedores/pagos.html', {'vendedor_form': vendedor_form})  
 
 class ListarVendedores(ListView):
     '''
@@ -155,9 +155,9 @@ class ListarVendedores(ListView):
         Args: request (HttpRequest): peticion HTTP.
     '''
     model = Vendedor
-    template_name = 'vendedores/clientes.html'
+    template_name = 'vendedores/pagos.html'
     context_object_name = 'vendedores'
-    paginate_by = 10
+    paginate_by = 5
 
 class PagosClientes(ListView):
     model = Cliente
@@ -187,10 +187,32 @@ class PagosClientes(ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['vendedores'] = Vendedor.objects.all()
+
+        # Lógica de paginación de vendedores
+        vendedor_paginator = Paginator(context['vendedores'], 5)
+        vendedor_page = self.request.GET.get('vendedor_page')
+        context['vendedores'] = vendedor_paginator.get_page(vendedor_page)
+
         vendedor_id = self.request.GET.get('vendedor')
         if vendedor_id:
             context['vendedor_seleccionado'] = Vendedor.objects.get(id=vendedor_id)
+
+        # Agregar el formulario de vendedores para el modal
+        context['vendedor_form'] = VendedorForm()
+        
         return context
+
+    def get(self, request, *args, **kwargs):
+        self.object_list = self.get_queryset()
+        context = self.get_context_data()
+        
+        # Lógica para manejar la petición AJAX
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            html = render_to_string('vendedores/vendedor_modal_content.html', context, request=request)
+            return HttpResponse(html)
+
+        return super().get(request, *args, **kwargs)
+
 
 @login_required
 def agregar_editar_pago(request, cliente_id,vendedor_id):
@@ -213,3 +235,8 @@ def agregar_editar_pago(request, cliente_id,vendedor_id):
         'cliente': cliente,
         'Vendedor' : vendedor
     })
+
+@login_required
+def informacion_cliente(request, cliente_id):
+    cliente = get_object_or_404(Cliente, id=cliente_id)
+    return render(request, 'clientes/informacion_cliente.html', {'cliente': cliente, 'cliente_id': cliente_id})

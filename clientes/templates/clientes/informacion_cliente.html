@@ -1,0 +1,33 @@
+<div class="card">
+    <div class="card-header d-flex justify-content-between">
+        <h3>{{ cliente.nombre }}</h3>
+        <button type="button" class="btn-close" id="btn-cerrar-cuadro" aria-label="Close"></button>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-4">
+                {% if cliente.fotografia %}
+                    <img src="{{ cliente.fotografia.url }}" class="img-thumbnail" alt="Foto de {{ cliente.nombre }}">
+                {% else %}
+                    <span class="text-muted">N/A</span>
+                {% endif %}
+            </div>
+            <div class="col-md-8">
+                <p><strong>Nombre</strong> {{ cliente.nombre }}</p>
+                <p><strong>CURP:</strong> {{ cliente.curp }}</p>
+                <p><strong>NSS:</strong> {{ cliente.nss }}</p>
+                <p><strong>Teléfono:</strong> {{ cliente.telefono }}</p>
+                <p><strong>Fecha de firma:</strong> {{ cliente.fecha_de_firma|date:"d-M-Y" }}</p>
+                <p><strong>Fecha de baja:</strong> {{ cliente.fecha_de_baja|date:"d-M-Y" }}</p>
+                <p><strong>Fecha para capturar retiro:</strong> {{ cliente.fecha_para_capturar_retiro|date:"d-M-Y" }}</p>
+                <p><strong>Observaciones:</strong> {{ cliente.observaciones }}</p>
+                <p><strong>Alta:</strong> {{ cliente.alta }}</p>
+                <p><strong>Vendedor:</strong> {{ cliente.vendedor }}</p>
+                <p><strong>RCV:</strong> {{ cliente.rcv }}</p>
+                <p><strong>Dirección:</strong> {{ cliente.direccion }}</p>
+                <p><strong>Colonia:</strong> {{ cliente.colonia }}</p>
+            </div>
+        </div>
+    </div>
+</div>
+

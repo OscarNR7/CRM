@@ -15,6 +15,7 @@
         {% endfor %}
     </tbody>
 </table>
+
 <div class="pagination">
     <span class="step-links">
         {% if vendedores.has_previous %}
@@ -32,11 +33,14 @@
         {% endif %}
     </span>
 </div>
-<form method="POST" action="{% url 'agregar_vendedor' %}">
-    {% csrf_token %}
-    <p>Agregar Vendedor</p>
-    <div class="mb-3">
-        {{ vendedor_form.as_p }}
-    </div>
-    <button type="submit" class="btn btn-success">Guardar</button>
-</form>
+
+{% if user.is_authenticated and user.userrole.role == 'gerente' or user.userrole.role == 'administrador' %}
+    <form method="POST" action="{% url 'agregar_vendedor' %}">
+        {% csrf_token %}
+        <p>Agregar Vendedor</p>
+        <div class="mb-3">
+            {{ vendedor_form.as_p }}
+        </div>
+        <button type="submit" class="btn btn-success">Guardar</button>
+    </form>
+{% endif %}
