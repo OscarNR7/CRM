@@ -69,7 +69,7 @@ class PagosClientes(ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['vendedores'] = Vendedor.objects.all()
+        context['vendedores'] = Vendedor.objects.all().order_by('nombre')
 
         # Lógica de paginación de vendedores
         vendedor_paginator = Paginator(context['vendedores'], 5)

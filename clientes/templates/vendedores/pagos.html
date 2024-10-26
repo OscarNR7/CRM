@@ -60,11 +60,13 @@
                             <td>{{ item.pago.porcentaje|default:"-" }}%</td>
                             <td>{{ item.pago.anticipo|default:"-" }}</td>
                             {% if user.is_authenticated and user.userrole.role == 'gerente' or user.userrole.role == 'administrador' %}
-                                <td>
-                                    <a href="{% url 'agregar_editar_pago' cliente_id=item.cliente.id vendedor_id=vendedor_seleccionado.id %}" class="btn btn-primary">
-                                        Agregar o Editar Pagos
-                                    </a>
-                                </td>
+                                <div>
+                                    <td>
+                                        <a href="{% url 'agregar_editar_pago' cliente_id=item.cliente.id vendedor_id=vendedor_seleccionado.id %}" class="btn btn-primary">
+                                            Agregar o Editar Pagos
+                                        </a>
+                                    </td>
+                                </div>
                             {% endif %}
                         </tr>
                     {% endfor %}

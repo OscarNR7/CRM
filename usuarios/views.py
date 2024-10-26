@@ -67,7 +67,7 @@ def crear_usuario(request):
 class EliminarUsuario(LoginRequiredMixin,DeleteView):
     model = User
     success_url = reverse_lazy('administrar_usuarios')
-    template_name = 'usuarios/usuario_confirm_delete.html'
+    template_name = 'usuarios/user_confirm_delete.html'
     def delete(self, request, *args, **kwargs):
         # Obtener el objeto cliente que se va a eliminar
         usuario = self.get_object()
