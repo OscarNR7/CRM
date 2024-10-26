@@ -51,10 +51,10 @@
                     {% for item in clientes %}
                         <tr>
                             <td>{{ item.cliente.nombre }}</td>
-                            <td>{{ item.cliente.fecha_de_firma }}</td>
+                            <td>{{ item.cliente.fecha_de_firma|date:"d-M-y" }}</td>
                             <td>{{ item.cliente.fecha_para_capturar_retiro }}</td>
                             <td>{{ item.pago.observaciones|default:"-" }}</td>
-                            <td>{{ item.pago.fecha_de_pago|default:"-" }}</td>
+                            <td>{{ item.pago.fecha_de_pago|date:"d-M-y" }}</td>
                             <td>{{ item.pago.cancelacion|default:"-" }}</td>
                             <td>{{ item.pago.cantidad|default:"-" }}</td>
                             <td>{{ item.pago.porcentaje|default:"-" }}%</td>

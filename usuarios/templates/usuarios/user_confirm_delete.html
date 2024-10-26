@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+
+{% block titulo %} Home {% endblock %}
+
+{% block content %}
+<h2>¿Estás seguro de que deseas eliminar al usuario?</h2>
+
+<div>
+    <p>Username: {{ object.username }}</p>
+    <p>Nombre: {{ object.first_name }}</p>
+    <p>Apellido: {{ object.last_name }}</p>
+    <p>Rol: {{ object.userrole.get_role_display }}</p>
+</div>
+
+
+<div class="alert alert-warning" role="alert">
+    Al eliminar un usuario, se borrarán todos sus datos y las relaciones con el sistema.
+</div>
+
+<form method="post">
+    {% csrf_token %}
+    <button type="submit" class="btn btn-danger">Eliminar Usuario</button>
+    <a href="{% url 'administrar_usuarios' %}" class="btn btn-secondary">Cancelar</a>
+</form>
+{% endblock %}

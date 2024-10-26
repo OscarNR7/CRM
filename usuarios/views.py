@@ -3,11 +3,15 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.contrib import messages
 from .models import UserRole
+from django.urls import reverse_lazy
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from usuarios.models import UserRole
 from django.contrib.auth import login, logout, authenticate
 from .forms import UserRoleAdminForm, UserAdminForm
 from .decorators import gerente_required, administrador_required
+from django.views.generic import DeleteView
+from django.utils.decorators import method_decorator
 
 @login_required
 @gerente_required
@@ -59,12 +63,17 @@ def crear_usuario(request):
         'role_form': role_form
     })
 
-@login_required
-@gerente_required
-def eliminar_usuario(request, user_id):
-    usuario = get_object_or_404(User, id=user_id)
-    usuario.delete()
-    return redirect('administrar_usuarios')
+@method_decorator([gerente_required], name='dispatch')
+class EliminarUsuario(LoginRequiredMixin,DeleteView):
+    model = User
+    success_url = reverse_lazy('administrar_usuarios')
+    template_name = 'usuarios/usuario_confirm_delete.html'
+    def delete(self, request, *args, **kwargs):
+        # Obtener el objeto cliente que se va a eliminar
+        usuario = self.get_object()
+        
+        return super().delete(request, *args, **kwargs)
+
 
 #-------------------------------------------------login------------------------------------------------
 

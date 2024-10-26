@@ -13,8 +13,11 @@ class ClienteForm(forms.ModelForm):
             'nss': forms.TextInput(attrs={'class': 'form-control'}),
             'telefono': forms.TextInput(attrs={'class': 'form-control'}),
             'fecha_de_firma': forms.DateInput(attrs={'class': 'form-control', 'placeholder': 'DD de Mes de YYYY'}),
-            'fecha_de_baja': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'DD-MMM'}),
-            'fecha_para_capturar_retiro': forms.DateInput(attrs={'class': 'form-control','type': 'date', 'placeholder': 'DD de Mes de YYYY'}),
+           'fecha_de_baja': forms.DateInput(
+                attrs={'class': 'form-control', 'placeholder': 'DD-MMM'},
+                format='%d-%b'
+            ),
+            'fecha_para_capturar_retiro': forms.DateInput(attrs={'class': 'form-control', 'placeholder': 'DD de Mes de YYYY'}),
             'observaciones': forms.TextInput(attrs={'class': 'form-control', 'rows': 2}),
             'direccion': forms.TextInput(attrs={'class': 'form-control', 'rows': 3}),
             'colonia': forms.TextInput(attrs={'class': 'form-control'}),
@@ -23,6 +26,55 @@ class ClienteForm(forms.ModelForm):
             'rcv': forms.TextInput(attrs={'class': 'form-control'}),
             'fotografia': forms.ClearableFileInput(attrs={'class': 'form-control'}),
         }
+
+    fecha_de_baja = forms.DateField(
+        input_formats=[
+            "%d-%b",
+            "%d/%m/%Y",       # 16/09/2024
+            "%d-%B-%Y",       # 16-Septiembre-2024
+            "%d-%b-%Y",       # 16-Sep-2024
+            "%d-%b-%y",         
+            ],
+        widget=forms.DateInput(attrs={'class': 'form-control', 'placeholder': 'DD-MMM o DD/MM/YYYY, etc.'}),
+    )
+    fecha_de_firma = forms.DateField(
+        input_formats=[
+            "%d-%b",
+            "%d/%m/%Y",
+            "%d/%m/%y",       # 16/09/2024
+            "%d-%B-%Y",       # 16-Septiembre-2024
+            "%d-%b-%Y",       # 16-Sep-2024
+            "%d-%b-%y",         
+            ],
+        widget=forms.DateInput(attrs={'class': 'form-control', 'placeholder': 'DD-MMM o DD/MM/YYYY, etc.'}),
+    )
+    fecha_para_capturar_retiro = forms.DateField(
+        input_formats=[
+            "%d-%b",
+            "%d/%m/%Y",       # 16/09/2024
+            "%d-%B-%Y",       # 16-Septiembre-2024
+            "%d-%b-%Y",       # 16-Sep-2024
+            "%d-%b-%y",         
+            ],
+        widget=forms.DateInput(attrs={'class': 'form-control', 'placeholder': 'DD-MMM o DD/MM/YYYY, etc.'}),
+    )
+    
+    def clean_fecha_de_firma(self):
+        fecha = self.cleaned_data['fecha_de_firma']
+        if fecha.year < 2024:
+            fecha = fecha.replace(year=2024)
+        return fecha
+    def clean_fecha_de_baja(self):
+        fecha = self.cleaned_data['fecha_de_baja']
+        if fecha.year < 2024:
+            fecha = fecha.replace(year=2024)
+        return fecha
+    
+    def clean_fecha_para_capturar_retiro(self):
+        fecha = self.cleaned_data['fecha_para_capturar_retiro']
+        if fecha.year < 2024:
+            fecha = fecha.replace(year=2024)
+        return fecha
 
 class VendedorForm(forms.ModelForm):
     class Meta:
@@ -44,3 +96,5 @@ class PagoForm(forms.ModelForm):
             'anticipo': forms.TextInput(attrs={'class': 'form-control'}),
             'observaciones': forms.TextInput(attrs={'class': 'form-control', 'rows': 2}),
         }
+
+        #

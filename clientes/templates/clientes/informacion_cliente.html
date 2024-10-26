@@ -17,9 +17,9 @@
                 <p><strong>CURP:</strong> {{ cliente.curp }}</p>
                 <p><strong>NSS:</strong> {{ cliente.nss }}</p>
                 <p><strong>Teléfono:</strong> {{ cliente.telefono }}</p>
-                <p><strong>Fecha de firma:</strong> {{ cliente.fecha_de_firma|date:"d-M-Y" }}</p>
-                <p><strong>Fecha de baja:</strong> {{ cliente.fecha_de_baja|date:"d-M-Y" }}</p>
-                <p><strong>Fecha para capturar retiro:</strong> {{ cliente.fecha_para_capturar_retiro|date:"d-M-Y" }}</p>
+                <p><strong>Fecha de firma:</strong> {{ cliente.fecha_de_firma|date:"d/m/y" }}</p>
+                <p><strong>Fecha de baja:</strong> {{ cliente.fecha_de_baja|date:"d-M" }}</p>
+                <p><strong>Fecha para capturar retiro:</strong> {{ cliente.fecha_para_capturar_retiro|date:"d-M-y" }}</p>
                 <p><strong>Observaciones:</strong> {{ cliente.observaciones }}</p>
                 <p><strong>Alta:</strong> {{ cliente.alta }}</p>
                 <p><strong>Vendedor:</strong> {{ cliente.vendedor }}</p>

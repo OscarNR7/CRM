@@ -3,8 +3,8 @@
 {% block content %}
 <div class="container-fluid mt-4">
     <div class="row">
-        <!-- Columna principal con la tabla de clientes -->
-        <div class="col-12" id="contenedor-tabla">
+        <!-- Tabla principal (lado izquierdo) -->
+        <div class="col-md-12">
             <div class="card">
                 <div class="card-header">
                     <h2 class="mb-0">Lista de Clientes</h2>
@@ -16,7 +16,7 @@
                 </div>
                 <div class="card-body">
                     <div class="table-responsive">
-                        <table class="table">
+                        <table class="table table-bordered table-hover">
                             <thead class="thead-dark">
                                 <tr>
                                     <th>ID</th>
@@ -28,7 +28,7 @@
                                     {% if user.is_authenticated and user.userrole.role == 'gerente' or user.userrole.role == 'administrador' %}
                                         <th>Acciones</th>
                                     {% endif %}
-                                    <th>Informacion Extra</th>
+                                    <th>Ver</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -40,22 +40,22 @@
                                         <td>{{ cliente.nss }}</td>
                                         <td>{{ cliente.telefono }}</td>
                                         <td>{{ cliente.vendedor }}</td>
-                                        </td>
                                         {% if user.is_authenticated and user.userrole.role == 'gerente' or user.userrole.role == 'administrador' %}
                                             <td>
-                                                <a class="btn btn-sm btn-info" href="{% url 'editar' cliente.id %}">E</a>
-                                                <a class="btn btn-sm btn-danger" href="{% url 'eliminar' cliente.id %}">X</a>
+                                                <a class="btn btn-sm btn-info" href="{% url 'editar' cliente.id %}">Editar</a>
+                                                <a class="btn btn-sm btn-danger" href="{% url 'eliminar' cliente.id %}">Eliminar</a>
                                             </td>   
                                         {% endif %}
                                         <td>
                                             <button type="button" class="btn btn-primary btn-mostrar" data-id="{{ cliente.id }}">
-                                                mostrar
+                                                Ver
                                             </button>
                                         </td>
                                     </tr>
                                 {% endfor %}
                             </tbody>
                         </table>   
+                        
                         <!-- Paginación -->
                         <div class="pagination">
                             <span class="step-links">
@@ -63,11 +63,9 @@
                                     <a href="?page=1">&laquo; primera</a>
                                     <a href="?page={{ page_obj.previous_page_number }}">anterior</a>
                                 {% endif %}
-                        
                                 <span class="current">
                                     Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}.
                                 </span>
-                        
                                 {% if page_obj.has_next %}
                                     <a href="?page={{ page_obj.next_page_number }}">siguiente</a>
                                     <a href="?page={{ page_obj.paginator.num_pages }}">última &raquo;</a>
@@ -75,116 +73,48 @@
                             </span>
                         </div>
                     </div>
-                        {% if user.is_authenticated and user.userrole.role == 'gerente' or user.userrole.role == 'administrador' %}     
-                            <div class="mt-3">
-                                <a class="btn btn-success" href="{% url 'agregar' %}">Agregar un Cliente</a>
-                            </div>
-                            <br>
-                        {% endif %}
+                    {% if user.is_authenticated and user.userrole.role == 'gerente' or user.userrole.role == 'administrador' %}     
+                        <div class="mt-3">
+                            <a class="btn btn-success" href="{% url 'agregar' %}">Agregar un Cliente</a>
+                        </div>
+                    {% endif %}
                 </div>
             </div>
         </div>
 
-        <!-- Cuadro de información del cliente -->
-        <div id="cuadro-informacion-cliente" class="position-fixed shadow" 
-             style="width: 40%; top: 20px; right: 20px; display: none; z-index: 1000; max-height: 90vh; overflow-y: auto;">
-            {% include 'clientes/informacion_cliente.html' %}
+        <!-- Información detallada (lado derecho) -->
+        <div class="col-md-4">
+            <div id="detalle-cliente" class="card sticky-top" style="top: 20px; display: none;">
+                {% include 'clientes/informacion_cliente.html' %}
+            </div>
         </div>
     </div>
 </div>
 
-<!-- Agregamos estilos específicos -->
-<style>
-    @media (max-width: 768px) {
-        #cuadro-informacion-cliente {
-            width: 90% !important;
-            top: 50% !important;
-            left: 50% !important;
-            transform: translate(-50%, -50%) !important;
-        }
-    }
-
-    #cuadro-informacion-cliente {
-        background-color: white;
-        border-radius: 8px;
-        box-shadow: 0 0 15px rgba(0,0,0,0.1);
-    }
-
-    /* Añade un efecto de overlay cuando el cuadro está visible */
-    .overlay {
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background-color: rgba(0,0,0,0.5);
-        z-index: 999;
-        display: none;
-    }
-</style>
-
-<!-- Actualizamos el JavaScript -->
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const botonesMostrar = document.querySelectorAll('.btn-mostrar');
-        const cuadroInfo = document.getElementById('cuadro-informacion-cliente');
-        let overlay;
+document.addEventListener('DOMContentLoaded', function() {
+    const botonesMostrar = document.querySelectorAll('.btn-mostrar');
+    const detalleCliente = document.getElementById('detalle-cliente');
 
-        // Crear el overlay
-        function createOverlay() {
-            overlay = document.createElement('div');
-            overlay.className = 'overlay';
-            document.body.appendChild(overlay);
-        }
-        createOverlay();
+    botonesMostrar.forEach(boton => {
+        boton.addEventListener('click', function() {
+            const clienteId = this.getAttribute('data-id');
 
-        // Función para cerrar el cuadro de información
-        function cerrarCuadroInfo() {
-            cuadroInfo.style.display = 'none';
-            overlay.style.display = 'none';
-            cuadroInfo.innerHTML = ''; // Limpia el contenido
-        }
-
-        // Manejar el evento de mostrar el cuadro de información
-        botonesMostrar.forEach(boton => {
-            boton.addEventListener('click', function() {
-                const clienteId = this.getAttribute('data-id');
-
-                fetch(`/clientes/${clienteId}/informacion/`, {
-                    headers: {
-                        'X-Requested-With': 'XMLHttpRequest'
-                    }
-                })
-                .then(response => response.text())
-                .then(html => {
-                    cuadroInfo.innerHTML = html;
-                    cuadroInfo.style.display = 'block';
-                    overlay.style.display = 'block';
-
-                    // Añadir evento para cerrar el cuadro de información
-                    const botonCerrar = document.getElementById('btn-cerrar-cuadro');
-                    if (botonCerrar) {
-                        botonCerrar.addEventListener('click', cerrarCuadroInfo);
-                    }
-                })
-                .catch(error => {
-                    console.error('Error al cargar la información:', error);
-                });
+            fetch(`/clientes/${clienteId}/informacion/`, {
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => response.text())
+            .then(html => {
+                detalleCliente.innerHTML = html;
+                detalleCliente.style.display = 'block';
+            })
+            .catch(error => {
+                console.error('Error al cargar la información:', error);
             });
         });
-
-        // Cerrar al hacer clic en el overlay
-        overlay.addEventListener('click', cerrarCuadroInfo);
-
-        // Cerrar con la tecla Escape
-        document.addEventListener('keydown', function(event) {
-            if (event.key === 'Escape' && cuadroInfo.style.display === 'block') {
-                cerrarCuadroInfo();
-            }
-        });
     });
+});
 </script>
 {% endblock %}
-
-
-
