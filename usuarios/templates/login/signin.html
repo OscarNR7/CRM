@@ -1,10 +1,13 @@
 {% extends 'layouts/login_base.html' %}
-
+{% load static %}
 {% block titulo %}Iniciar Sesión{% endblock %}
 
 {% block content %}
     <div class="logH">
         <h3 id="IniciarS" class="text-center">Iniciar Sesión</h3>
+    </div>
+    <div class="logAva">
+        <img src="{% static 'img/avatar.svg' %}" alt="" id="imgUser">
     </div>
     <div class="logF">
         <form method="post">
@@ -18,7 +21,7 @@
             {% endif %} 
             {{ form.as_p }}
             <div class="botonSum">
-                <button type="submit" class="btn btn-primary">Iniciar Sesión</button>
+                <button type="submit" class="btnIni">Iniciar Sesión</button>
             </div>
         </form>
         <!-- <div class="text-center">
