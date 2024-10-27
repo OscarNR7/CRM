@@ -5,20 +5,12 @@ from datetime import datetime
 
 class ClienteForm(forms.ModelForm):
     # Convertir los campos DateField a CharField
-    fecha_de_firma = forms.DateField(
-        required=False,
-        input_formats=['%d/%m/%Y','%d/%m/%y'],  # Formato de entrada DD/MM/YYYY
-        widget=forms.TextInput(attrs={
-            'class': 'form-control',
-            'placeholder': 'DD/MM/YYYY'
-        })
-    )
-    
     fecha_de_baja = forms.CharField(
         required=False,
         widget=forms.TextInput(attrs={
             'class': 'form-control',
-            'placeholder': 'DD-Mes-YYYY o DD/Mes/YYYY'
+            'placeholder': 'DD-Mes-YYYY o DD/Mes/YYYY',
+            
         })
     )
     
@@ -38,7 +30,7 @@ class ClienteForm(forms.ModelForm):
             'curp': forms.TextInput(attrs={'class': 'form-control'}),
             'nss': forms.TextInput(attrs={'class': 'form-control'}),
             'telefono': forms.TextInput(attrs={'class': 'form-control'}),
-            'fecha_de_firmar': forms.TextInput(attrs={'class': 'form-control'}),
+            'fecha_de_firma': forms.DateInput(attrs={'class': 'form-control', 'placeholder': 'DD de Mes de YYYY'}),
             'observaciones': forms.TextInput(attrs={'class': 'form-control', 'rows': 2}),
             'direccion': forms.TextInput(attrs={'class': 'form-control', 'rows': 3}),
             'colonia': forms.TextInput(attrs={'class': 'form-control'}),
