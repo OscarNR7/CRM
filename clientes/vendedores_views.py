@@ -72,10 +72,13 @@ class PagosClientes(ListView):
     context_object_name = 'pagos_por_semana'
 
     def get_queryset(self):
+        vendedor_id = self.request.GET.get('vendedor')
+        if not vendedor_id:
+            return {}
         try:
-            vendedor_id = self.request.GET.get('vendedor')
             if vendedor_id:
-                clientes = Cliente.objects.filter(vendedor_id=vendedor_id).prefetch_related(
+                 if vendedor_id:
+                    clientes = Cliente.objects.filter(vendedor_id=vendedor_id).prefetch_related(
                     Prefetch('pagos', queryset=Pago.objects.order_by('fecha_de_pago'))
                 ).annotate(
                     fecha_de_firma_date=Cast('fecha_de_firma', DateField()),  # convierte a DateField
@@ -99,6 +102,7 @@ class PagosClientes(ListView):
                     'pago': cliente.pagos.first()
                 })
             return dict(sorted(pagos_por_semana.items()))
+            
         except Exception as e:
             messages.error(self.request, "Ocurrió un error al obtener los pagos.")
             logger.error(f"Error en PagosClientes.get_queryset: {e}")  # Registro del error
@@ -151,11 +155,14 @@ def agregar_editar_pago(request, cliente_id,vendedor_id):
     else:
         form = PagoForm(instance=pago)
     
-    return render(request, 'vendedores/agregar_editar_pago.html', {
+    context= {
         'form': form,
         'cliente': cliente,
-        'Vendedor' : vendedor
-    })
+        'Vendedor' : vendedor,
+        'vendedor_id': vendedor_id,
+    }
+    return render(request, 'vendedores/agregar_editar_pago.html', context)
+
 
 #eliminar vendedor + confirmacion para eliminar
 @login_required

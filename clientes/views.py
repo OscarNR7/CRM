@@ -48,22 +48,30 @@ class ListarClientes(LoginRequiredMixin,ListView):
     paginate_by = 10
 
     def get_queryset(self):
-        '''
-            
-        '''
-        query = self.request.GET.get('search','')
-        cliente = Cliente.objects.all()
+        query = self.request.GET.get('search', '').strip()
+        queryset = Cliente.objects.all()
         
         if query:
-
             terms = query.split()
             search_filters = Q()
 
             for term in terms:
-                search_filters |= Q(nombre__icontains=term) |Q(curp__icontains=term)| Q(nss__icontains=term) |Q(direccion__icontains=term) | Q(colonia__icontains=term) | Q(telefono__icontains=term)  | Q(vendedor__nombre__icontains=term)
-                
-            cliente = cliente.filter(search_filters)
-        return cliente
+                terms = query.split()
+                if term:
+                    search_filters |= ( Q(nombre__icontains=term) |
+                    Q(curp__icontains=term)| 
+                    Q(nss__icontains=term) |
+                    Q(direccion__icontains=term) | 
+                    Q(colonia__icontains=term) | 
+                    Q(telefono__icontains=term)  | 
+                    Q(vendedor__nombre__icontains=term)
+                    )
+            queryset = queryset.filter(search_filters)
+        return queryset.distinct()
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['search_term'] = self.request.GET.get('search', '')
+        return context
     
 #funcion para agregar un nuevo cliente
 @login_required

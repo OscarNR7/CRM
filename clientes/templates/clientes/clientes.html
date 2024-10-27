@@ -1,6 +1,7 @@
 {% extends 'base.html' %}
 {% block titulo %}Clientes{% endblock %}
 {% block content %}
+
 <div class="container-fluid mt-4">
     <div class="row">
         <!-- Tabla principal (lado izquierdo) -->
@@ -8,27 +9,48 @@
             <div class="card">
                 <div class="card-header">
                     <h2 class="mb-0">Lista de Clientes</h2>
-                    <form method="GET" action="{% url 'clientes' %}" class="d-flex mt-3" role="search">
-                        <input class="form-control me-2" type="search" placeholder="Buscar clientes..." 
-                        name="search" aria-label="Search" value="">
+                    {% if messages %}
+                        <div class="alert alert-danger" role="alert">
+                            {% for message in messages %}
+                                {{ message }}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                    <!--Buscador-->
+                    <form method="GET" action="{% url 'clientes' %}" class="d-flex mt-3" role="search" id="searchForm">
+                        <input 
+                            class="form-control me-2" 
+                            type="search" 
+                            placeholder="Buscar clientes..." 
+                            name="search" 
+                            aria-label="Search" 
+                            value="{{ request.GET.search|default:'' }}"
+                            id="searchInput"
+                            autocomplete="off">
                         <button class="btn btn-outline-primary" type="submit">Buscar</button>
                     </form>
                 </div>
                 <div class="card-body">
                     <div class="table-responsive">
-                        <table class="table table-bordered table-hover">
+                        <table class="table table-bordered table-hover" style="table-layout: fixed;">
                             <thead class="thead-dark">
                                 <tr>
                                     <th>ID</th>
                                     <th>Nombre</th>
                                     <th>CURP</th>
                                     <th>NSS</th>
-                                    <th>Tel</th>
+                                    <th>Telefono</th>
+                                    <th>Fecha de Firma</th>
+                                    <th>Fecha de Baja</th>
+                                    <th>Fecha Para Capturar Retiro</th>
+                                    <th>Observaciones</th>
+                                    <th>Alta</th>
                                     <th>Vendedor</th>
+                                    <th>RCV</th>
                                     {% if user.is_authenticated and user.userrole.role == 'gerente' or user.userrole.role == 'administrador' %}
                                         <th>Acciones</th>
                                     {% endif %}
-                                    <th>Ver</th>
+                                    
                                 </tr>
                             </thead>
                             <tbody>
@@ -39,18 +61,20 @@
                                         <td>{{ cliente.curp }}</td>
                                         <td>{{ cliente.nss }}</td>
                                         <td>{{ cliente.telefono }}</td>
+                                        <td>{{ cliente.fecha_de_firma|date:"d/m/Y" }}</td>
+                                        <td>{{ cliente.fecha_de_baja }}</td>
+                                        <td>{{ cliente.fecha_para_capturar_retiro }}</td>
+                                        <td>{{ cliente.observaciones }}</td>
+                                        <td>{{ cliente.alta }}</td>
                                         <td>{{ cliente.vendedor }}</td>
+                                        <td>{{ cliente.rcv }}</td>
                                         {% if user.is_authenticated and user.userrole.role == 'gerente' or user.userrole.role == 'administrador' %}
                                             <td>
                                                 <a class="btn btn-sm btn-info" href="{% url 'editar' cliente.id %}">Editar</a>
                                                 <a class="btn btn-sm btn-danger" href="{% url 'eliminar' cliente.id %}">Eliminar</a>
                                             </td>   
                                         {% endif %}
-                                        <td>
-                                            <button type="button" class="btn btn-primary btn-mostrar" data-id="{{ cliente.id }}">
-                                                Ver
-                                            </button>
-                                        </td>
+                                        
                                     </tr>
                                 {% endfor %}
                             </tbody>
@@ -92,29 +116,66 @@
 </div>
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const botonesMostrar = document.querySelectorAll('.btn-mostrar');
-    const detalleCliente = document.getElementById('detalle-cliente');
-
-    botonesMostrar.forEach(boton => {
-        boton.addEventListener('click', function() {
-            const clienteId = this.getAttribute('data-id');
-
-            fetch(`/clientes/${clienteId}/informacion/`, {
-                headers: {
-                    'X-Requested-With': 'XMLHttpRequest'
-                }
-            })
-            .then(response => response.text())
-            .then(html => {
-                detalleCliente.innerHTML = html;
-                detalleCliente.style.display = 'block';
-            })
-            .catch(error => {
-                console.error('Error al cargar la información:', error);
+    document.addEventListener('DOMContentLoaded', function() {
+        // Código para el botón mostrar
+        const botonesMostrar = document.querySelectorAll('.btn-mostrar');
+        const detalleCliente = document.getElementById('detalle-cliente');
+    
+        botonesMostrar.forEach(boton => {
+            boton.addEventListener('click', function() {
+                const clienteId = this.getAttribute('data-id');
+    
+                fetch(`/clientes/${clienteId}/informacion/`, {
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                })
+                .then(response => response.text())
+                .then(html => {
+                    detalleCliente.innerHTML = html;
+                    detalleCliente.style.display = 'block';
+                    
+                    const btnCerrarCuadro = detalleCliente.querySelector('#btn-cerrar-cuadro');
+                    if (btnCerrarCuadro) {
+                        btnCerrarCuadro.addEventListener('click', function() {
+                            detalleCliente.style.display = 'none';
+                        });
+                    }
+                })
+                .catch(error => {
+                    console.error('Error al cargar la información:', error);
+                });
             });
         });
+    
+        // Código para el buscador
+        const searchForm = document.getElementById('searchForm');
+        const searchInput = document.getElementById('searchInput');
+    
+        // Manejar el evento submit del formulario
+        searchForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            if (searchInput.value.trim() !== '') {
+                this.submit();
+            }
+        });
+    
+        // Manejar el evento keydown para la tecla Enter
+        searchInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                if (this.value.trim() !== '') {
+                    searchForm.submit();
+                }
+            }
+        });
+    
+        // Manejar el evento input para limpiar la búsqueda
+        searchInput.addEventListener('input', function(e) {
+            if (this.value === '') {
+                window.location.href = "{% url 'clientes' %}";
+            }
+        });
     });
-});
-</script>
+    </script>
 {% endblock %}

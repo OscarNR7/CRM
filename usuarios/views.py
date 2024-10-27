@@ -101,26 +101,26 @@ class EliminarUsuario(LoginRequiredMixin,DeleteView):
 
 #-------------------------------------------------login------------------------------------------------
 
-def signup(request):
-    if request.method == 'POST':
-        form = UserCreationForm(request.POST)
-        try:
-            if form.is_valid():
-                user = form.save()
-                UserRole.objects.create(user=user, role='supervisor')  # Rol por defecto
-                login(request, user)
-                messages.success(request, "Usuario registrado y autenticado exitosamente.")
-                return redirect('home')
-            else:
-                messages.error(request, "Error en el registro. Verifique los datos.")
-        except ValidationError as e:
-            messages.error(request, f"Error de validación: {e}")
-        except Exception as e:
-            messages.error(request, f"Error al registrar el usuario: {e}")
-    else:
-        form = UserCreationForm()
+# def signup(request):
+#     if request.method == 'POST':
+#         form = UserCreationForm(request.POST)
+#         try:
+#             if form.is_valid():
+#                 user = form.save()
+#                 UserRole.objects.create(user=user, role='supervisor')  # Rol por defecto
+#                 login(request, user)
+#                 messages.success(request, "Usuario registrado y autenticado exitosamente.")
+#                 return redirect('home')
+#             else:
+#                 messages.error(request, "Error en el registro. Verifique los datos.")
+#         except ValidationError as e:
+#             messages.error(request, f"Error de validación: {e}")
+#         except Exception as e:
+#             messages.error(request, f"Error al registrar el usuario: {e}")
+#     else:
+#         form = UserCreationForm()
     
-    return render(request, 'login/signup.html', {'form': form})
+#     return render(request, 'login/signup.html', {'form': form})
 
 #Funcion para cerrar sesión en el sistema
 def signout(request):
@@ -150,7 +150,6 @@ def signin(request):
         return render(request, 'login/signin.html', {'form': AuthenticationForm()})
     else:
         login(request, user)
-        messages.success(request, "Sesión iniciada exitosamente.")
         return redirect('home')
     
 def profile(request):

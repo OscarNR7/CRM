@@ -21,7 +21,7 @@ class Cliente(models.Model):
     curp = models.CharField(max_length=100, unique=True,  help_text="Clave Única de Registro de Población (CURP)")
     nss = models.CharField(max_length=100, unique=True, help_text="Número de Seguridad Social (NSS)")
     telefono = models.CharField(max_length=50, unique=True, null=True ,help_text="Numero de telefono del cliente")
-    fecha_de_firma = models.CharField(max_length=50, null=True, blank=True, help_text="Fecha de Firma")
+    fecha_de_firma = models.DateField(null=True, blank=True, help_text="Fecha de Firma (DD/MM/YYYY)")
     fecha_de_baja = models.CharField(max_length=50, null=True, blank=True, help_text="Fecha de Baja")
     fecha_para_capturar_retiro = models.CharField(max_length=50, null=True, blank=True, help_text="Fecha para capturar retiro")
     observaciones = models.TextField(verbose_name="observaciones",null=True, blank=True,help_text="Observaciones del cliente")
@@ -51,16 +51,28 @@ class Cliente(models.Model):
                 try:
                     # Convertir la fecha de baja a formato correcto
                     fecha_baja_str = self.fecha_de_baja.replace('/', '-')
+                    
                     # Diccionario para convertir abreviaciones de meses a números
                     meses = {
                         'Ene': '01', 'Feb': '02', 'Mar': '03', 'Abr': '04',
                         'May': '05', 'Jun': '06', 'Jul': '07', 'Ago': '08',
                         'Sep': '09', 'Oct': '10', 'Nov': '11', 'Dic': '12',
+                        #fechas en minusculas
+                        'ene': '01', 'feb': '02', 'mar': '03', 'abr': '04',
+                        'may': '05', 'jun': '06', 'jul': '07', 'ago': '08',
+                        'sep': '09', 'oct': '10', 'nov': '11', 'dic': '12',
                         # Incluir también nombres completos por si acaso
                         'Enero': '01', 'Febrero': '02', 'Marzo': '03', 'Abril': '04',
                         'Mayo': '05', 'Junio': '06', 'Julio': '07', 'Agosto': '08',
-                        'Septiembre': '09', 'Octubre': '10', 'Noviembre': '11', 'Diciembre': '12'
+                        'Septiembre': '09', 'Octubre': '10', 'Noviembre': '11', 'Diciembre': '12',
+                        # Incluir también nombres completos en minusculas por si acaso
+                        'enero': '01', 'febrero': '02', 'marzo': '03', 'abril': '04',
+                        'mayo': '05', 'junio': '06', 'julio': '07', 'agosto': '08',
+                        'septiembre': '09', 'octubre': '10', 'noviembre': '11', 'diciembre': '12'
                     }
+                     # Lista de formatos de fecha aceptados
+                    formatos_fecha = ["%d-%m-%Y", "%d/%m/%Y", "%d-%b-%Y", "%d/%b/%Y", "%d-%B-%Y", "%d/%B/%Y"]
+                    
                     # Separar el día y mes
                     partes = fecha_baja_str.split('-')
                     if len(partes) == 2:
@@ -103,6 +115,7 @@ class Cliente(models.Model):
 class Pago(models.Model):
     cliente = models.ForeignKey(Cliente, on_delete=models.CASCADE, related_name='pagos')
     fecha_de_pago = models.DateField(null=True, blank=True)
+    F46dias = models.DateField(null=True, blank=True)
     cancelacion = models.CharField(max_length=50,blank=True, null=True)
     cantidad = models.DecimalField(max_digits=10, decimal_places=2)
     porcentaje = models.DecimalField(max_digits=5, decimal_places=2)

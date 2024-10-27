@@ -15,7 +15,7 @@
                 <td>
                     <form action="{% url 'eliminar_vendedor' vendedor.id %}" method="post" style="display: inline;">
                         {% csrf_token %}
-                        <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('¿Estás seguro de que deseas eliminar este usuario?');">Eliminar</button>
+                        <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('¿Estás seguro de que deseas eliminar a este vendedor?');">Eliminar</button>
                     </form>
                 </td>
             </tr>

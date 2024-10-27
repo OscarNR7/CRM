@@ -29,14 +29,11 @@
                             </li>
                             {% if user.userrole.role == 'gerente' %}
                                 <li class="nav-item">
-                                    <a class="nav-link" href="{% url 'administrar_usuarios' %}">Administrar Usuarios</a>
+                                    <a class="nav-link" href="{% url 'administrar_usuarios' %}">Usuarios</a>
                                 </li>
                             {% endif %}
                             <li class="nav-item">
                                 <a class="nav-link" href="{% url 'pagos' %}">Pagos</a>
-                            </li>
-                            <li class="nav-item">
-                                <span class="nav-link">Rol del usuario: {{ user.userrole.role }}</span>
                             </li>
                         {% endif %}
                     </ul>

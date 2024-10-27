@@ -11,7 +11,7 @@
         {% csrf_token %}
         {{ form.as_p }}
         <button type="submit" class="btn btn-primary">Guardar</button>
-        
+        <a class="btn btn-primary" href="{% url 'pagos' %}?vendedor={{ vendedor_id|default:'' }}" role="button">Cancelar</a>
     </form>
     
 {% endblock %}

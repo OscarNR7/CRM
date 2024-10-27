@@ -24,7 +24,13 @@
         </button>
 
     </form>
-    
+        {% if messages %}
+            <div class="alert alert-danger" role="alert">
+                {% for message in messages %}
+                    {{ message }}
+                {% endfor %}
+            </div>
+        {% endif %} 
     {% if vendedor_seleccionado %}
         <h2>Vendedor: {{ vendedor_seleccionado.nombre }}</h2>
         
@@ -57,8 +63,8 @@
                     {% for item in datos.clientes %}
                         <tr>
                             <td>{{ item.cliente.nombre }}</td>
-                            <td>{{ item.cliente.fecha_de_firma }}</td>
-                            <td>{{ item.cliente.fecha_para_capturar_retiro }}</td>
+                            <td>{{ item.cliente.fecha_de_firma|date:"d-M-y" }}</td>
+                            <td>{{ item.pago.F46dias|default:"-" }}</td>
                             <td>{{ item.pago.observaciones|default:"-" }}</td>
                             <td>{{ item.pago.fecha_de_pago|date:"d-M-y" }}</td>
                             <td>{{ item.pago.cancelacion|default:"-" }}</td>

@@ -2,6 +2,13 @@
 
 {% block content %}
 <h2>Administrar Usuarios</h2>
+{% if messages %}
+    <div class="alert alert-danger" role="alert">
+        {% for message in messages %}
+            {{ message }}
+        {% endfor %}
+    </div>
+{% endif %}
 <a href="{% url 'crear_usuario' %}" class="btn btn-success mb-3">Crear Nuevo Usuario</a>
 <table class="table">
     <thead>
