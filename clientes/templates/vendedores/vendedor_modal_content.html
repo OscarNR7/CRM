@@ -1,39 +1,48 @@
-<!-- Tabla de vendedores -->
+<!-- Tabla de vendedores con paginación -->
 <table class="table">
     <thead>
         <tr>
             <th>ID</th>
             <th>Nombre</th>
+            <th>Acciones</th>
         </tr>
     </thead>
     <tbody>
-        {% for vendedor in vendedores %}
+        {% for vendedor in vendedores_paginados %}
             <tr>
                 <td>{{ vendedor.id }}</td>
                 <td>{{ vendedor.nombre }}</td>
+                <td>
+                    <form action="{% url 'eliminar_vendedor' vendedor.id %}" method="post" style="display: inline;">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('¿Estás seguro de que deseas eliminar este usuario?');">Eliminar</button>
+                    </form>
+                </td>
             </tr>
         {% endfor %}
     </tbody>
 </table>
 
+<!-- Enlaces de paginación -->
 <div class="pagination">
     <span class="step-links">
-        {% if vendedores.has_previous %}
-            <a href="#" class="vendedor-page-link" data-page="1">&laquo; primera</a>
-            <a href="#" class="vendedor-page-link" data-page="{{ vendedores.previous_page_number }}">anterior</a>
+        {% if vendedores_paginados.has_previous %}
+            <a href="#" class="vendedor-page-link" data-page="1">&laquo; Primera</a>
+            <a href="#" class="vendedor-page-link" data-page="{{ vendedores_paginados.previous_page_number }}">Anterior</a>
         {% endif %}
 
         <span class="current">
-            Página {{ vendedores.number }} de {{ vendedores.paginator.num_pages }}.
+            Página {{ vendedores_paginados.number }} de {{ vendedores_paginados.paginator.num_pages }}.
         </span>
 
-        {% if vendedores.has_next %}
-            <a href="#" class="vendedor-page-link" data-page="{{ vendedores.next_page_number }}">siguiente</a>
-            <a href="#" class="vendedor-page-link" data-page="{{ vendedores.paginator.num_pages }}">última &raquo;</a>
+        {% if vendedores_paginados.has_next %}
+            <a href="#" class="vendedor-page-link" data-page="{{ vendedores_paginados.next_page_number }}">Siguiente</a>
+            <a href="#" class="vendedor-page-link" data-page="{{ vendedores_paginados.paginator.num_pages }}">Última &raquo;</a>
         {% endif %}
     </span>
 </div>
 
+<!-- Formulario para agregar vendedor si el usuario es gerente o administrador -->
 {% if user.is_authenticated and user.userrole.role == 'gerente' or user.userrole.role == 'administrador' %}
     <form method="POST" action="{% url 'agregar_vendedor' %}">
         {% csrf_token %}

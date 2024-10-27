@@ -1,4 +1,5 @@
 import os
+import logging
 from datetime import datetime
 
 from django.conf import settings
@@ -22,6 +23,8 @@ from .forms import *
 from .models import *
 from usuarios.decorators import gerente_required, administrador_required
 from usuarios.models import UserRole
+
+logger = logging.getLogger('clientes')
 
 # Create your views here.
 #Renderiza la pagina de inicio
@@ -57,7 +60,7 @@ class ListarClientes(LoginRequiredMixin,ListView):
             search_filters = Q()
 
             for term in terms:
-                search_filters |= Q(nombre__icontains=term) |Q(curp__icontains=term)| Q(nss__icontains=term) |Q(direccion__icontains=term) | Q(colonia__icontains=term) | Q(telefono__icontains=term) 
+                search_filters |= Q(nombre__icontains=term) |Q(curp__icontains=term)| Q(nss__icontains=term) |Q(direccion__icontains=term) | Q(colonia__icontains=term) | Q(telefono__icontains=term)  | Q(vendedor__nombre__icontains=term)
                 
             cliente = cliente.filter(search_filters)
         return cliente
@@ -71,10 +74,18 @@ def agregar_cliente(request):
         Args: request (HttpRequest): peticion HTTP
     '''
     formulario = ClienteForm(request.POST or None, request.FILES or None)
-    if formulario.is_valid():
-        formulario.save()
-        return redirect('clientes')
-    return render(request, 'clientes/agregar.html',{'formulario':formulario})
+    try:
+        if formulario.is_valid():
+            formulario.save()
+            if 'guardar_y_agregar' in request.POST:
+                return redirect('agregar')
+            return redirect('clientes')
+    except IntegrityError as e:
+        messages.error(request, f"Error al agregar cliente: {e}")
+    except Exception as e:
+        messages.error(request, "Ocurrió un error inesperado.")
+        logger.error(f"Error en agregar_cliente: {e}")  # Registro del error
+    return render(request, 'clientes/agregar.html', {'formulario': formulario, 'modo': 'agregar'})
 
 #funcion para editar un cliente existente
 @login_required
@@ -89,7 +100,7 @@ def editar_cliente(request, id):
     if formulario.is_valid() and request.POST:
         formulario.save()
         return redirect('clientes')
-    return render(request, 'clientes/editar.html',{'formulario':formulario})
+    return render(request, 'clientes/editar.html',{'formulario':formulario, 'modo':'editar'})
     
 #funcion para eliminar un cliente existente 
 @method_decorator([administrador_required], name='dispatch')
@@ -113,3 +124,8 @@ class EliminarCliente(LoginRequiredMixin,DeleteView):
         
         # Eliminar el cliente
         return super().delete(request, *args, **kwargs)
+    
+@login_required
+def informacion_cliente(request, cliente_id):
+    cliente = get_object_or_404(Cliente, id=cliente_id)
+    return render(request, 'clientes/informacion_cliente.html', {'cliente': cliente, 'cliente_id': cliente_id})

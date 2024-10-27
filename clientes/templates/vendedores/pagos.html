@@ -28,8 +28,14 @@
     {% if vendedor_seleccionado %}
         <h2>Vendedor: {{ vendedor_seleccionado.nombre }}</h2>
         
-        {% for semana, clientes in pagos_por_semana.items %}
-            <h3>Semana {{ semana }}</h3>
+        {% for semana, datos in pagos_por_semana.items %}
+            {% if datos.clientes %}
+               
+                <h3><strong>SEMANA {{ semana }} DEL {{ datos.fecha_inicio|date:"d \d\e M"|upper }} AL {{ datos.fecha_fin|date:"d \d\e M"|upper }}</strong></h3>
+                
+            {% else %}
+                <h3>SEMANA {{ semana }} (sin clientes)</h3>
+            {% endif %}
             <table class="table">
                 <thead class="thead-dark">
                     <tr>
@@ -48,10 +54,10 @@
                     </tr>
                 </thead>
                 <tbody>
-                    {% for item in clientes %}
+                    {% for item in datos.clientes %}
                         <tr>
                             <td>{{ item.cliente.nombre }}</td>
-                            <td>{{ item.cliente.fecha_de_firma|date:"d-M-y" }}</td>
+                            <td>{{ item.cliente.fecha_de_firma }}</td>
                             <td>{{ item.cliente.fecha_para_capturar_retiro }}</td>
                             <td>{{ item.pago.observaciones|default:"-" }}</td>
                             <td>{{ item.pago.fecha_de_pago|date:"d-M-y" }}</td>
