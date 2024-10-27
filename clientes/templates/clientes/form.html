@@ -17,5 +17,8 @@
         </div>
     {% endfor %}
     <input class="btn btn-success" type="submit" value="Enviar Datos">
+    {% if modo == 'agregar' %}
+        <input class="btn btn-success" type="submit" name="guardar_y_agregar" value="Guardar y agregar otro">
+    {% endif %}
     <a class="btn btn-primary" href="{% url 'clientes' %}" role="button">Cancelar</a>
 </form>

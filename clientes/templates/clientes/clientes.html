@@ -2,140 +2,119 @@
 {% block titulo %}Clientes{% endblock %}
 {% block content %}
 <div class="container-fluid mt-4">
-    <div class="card">
-        <div class="card-header">
-            <h2 class="mb-0">Lista de Clientes</h2>
-            <form method="GET" action="{% url 'clientes' %}" class="d-flex mt-3" role="search">
-                <input class="form-control me-2" type="search" placeholder="Buscar clientes..." 
-                name="search" aria-label="Search" value="">
-                <button class="btn btn-outline-primary" type="submit">Buscar</button>
-            </form>
-        </div>
-        <div class="card-body">
-            <div class="table-responsive">
-                <table class="table">
-                    <thead class="thead-dark">
-                        <tr>
-                            <th>ID</th>
-                            <th>Nombre</th>
-                            <th>CURP</th>
-                            <th>NSS</th>
-                            <th>Tel</th>
-                            <th>Fecha de Firma</th>
-                            <th>Fecha de Baja</th>
-                            <th>Fecha Para CapturarRetiro</th>
-                            <th>Observaciones</th>
-                            <th>Alta</th>
-                            <th>Vendedor</th>
-                            <th>RCV</th>
-                            <th>Dirección</th>
-                            <th>Colonia</th>
-                            <th>Foto</th>
-                            {% if user.is_authenticated and user.userrole.role == 'gerente' or user.userrole.role == 'administrador' %}
-                                <th>Acciones</th>
-                            {% endif %}
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for cliente in clientes %}
-                            <tr>
-                                <td>{{ cliente.id }}</td>
-                                <td>{{ cliente.nombre }}</td>
-                                <td>{{ cliente.curp }}</td>
-                                <td>{{ cliente.nss }}</td>
-                                <td>{{ cliente.telefono }}</td>
-                                <td>{{ cliente.fecha_de_firma}}</td>
-                                <td>{{ cliente.fecha_de_baja|date:"d-M"}}</td>
-                                <td>{{ cliente.fecha_para_capturar_retiro}}</td>
-                                <td><span class="d-inline-block text-truncate" style="max-width: 100px;">{{ cliente.observaciones }}</span></td>
-                                <td>{{ cliente.alta}}</td>
-                                <td>{{ cliente.vendedor }}</td>
-                                <td>{{ cliente.rcv }}</td>
-                                <td><span class="d-inline-block text-truncate" style="max-width: 100px;">{{ cliente.direccion }}</span></td>
-                                <td>{{ cliente.colonia }}</td>
-                                <td>
-                                    {% if cliente.fotografia %}
-                                        <img src="{{ cliente.fotografia.url }}" class="img-thumbnail" alt="Foto de {{ cliente.nombre }}" style="max-width: 50px; max-height: 50px;">
-                                    {% else %}
-                                        <span class="text-muted">N/A</span>
+    <div class="row">
+        <!-- Tabla principal (lado izquierdo) -->
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="mb-0">Lista de Clientes</h2>
+                    <form method="GET" action="{% url 'clientes' %}" class="d-flex mt-3" role="search">
+                        <input class="form-control me-2" type="search" placeholder="Buscar clientes..." 
+                        name="search" aria-label="Search" value="">
+                        <button class="btn btn-outline-primary" type="submit">Buscar</button>
+                    </form>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-hover">
+                            <thead class="thead-dark">
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Nombre</th>
+                                    <th>CURP</th>
+                                    <th>NSS</th>
+                                    <th>Tel</th>
+                                    <th>Vendedor</th>
+                                    {% if user.is_authenticated and user.userrole.role == 'gerente' or user.userrole.role == 'administrador' %}
+                                        <th>Acciones</th>
                                     {% endif %}
-                                </td>
-                                {% if user.is_authenticated and user.userrole.role == 'gerente' or user.userrole.role == 'administrador' %}
-                                    <td>
-                                        <a class="btn btn-sm btn-info" href="{% url 'editar' cliente.id %}">E</a>
-                                        <a class="btn btn-sm btn-danger" href="{% url 'eliminar' cliente.id %}">X</a>
-                                    </td>   
+                                    <th>Ver</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for cliente in clientes %}
+                                    <tr>
+                                        <td>{{ cliente.id }}</td>
+                                        <td>{{ cliente.nombre }}</td>
+                                        <td>{{ cliente.curp }}</td>
+                                        <td>{{ cliente.nss }}</td>
+                                        <td>{{ cliente.telefono }}</td>
+                                        <td>{{ cliente.vendedor }}</td>
+                                        {% if user.is_authenticated and user.userrole.role == 'gerente' or user.userrole.role == 'administrador' %}
+                                            <td>
+                                                <a class="btn btn-sm btn-info" href="{% url 'editar' cliente.id %}">Editar</a>
+                                                <a class="btn btn-sm btn-danger" href="{% url 'eliminar' cliente.id %}">Eliminar</a>
+                                            </td>   
+                                        {% endif %}
+                                        <td>
+                                            <button type="button" class="btn btn-primary btn-mostrar" data-id="{{ cliente.id }}">
+                                                Ver
+                                            </button>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>   
+                        
+                        <!-- Paginación -->
+                        <div class="pagination">
+                            <span class="step-links">
+                                {% if page_obj.has_previous %}
+                                    <a href="?page=1">&laquo; primera</a>
+                                    <a href="?page={{ page_obj.previous_page_number }}">anterior</a>
                                 {% endif %}
-                            </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>   
-                <div class="pagination">
-                    <span class="step-links">
-                        {% if page_obj.has_previous %}
-                            <a href="?page=1">&laquo; primera</a>
-                            <a href="?page={{ page_obj.previous_page_number }}">anterior</a>
-                        {% endif %}
-                
-                        <span class="current">
-                            Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}.
-                        </span>
-                
-                        {% if page_obj.has_next %}
-                            <a href="?page={{ page_obj.next_page_number }}">siguiente</a>
-                            <a href="?page={{ page_obj.paginator.num_pages }}">última &raquo;</a>
-                        {% endif %}
-                    </span>
-                </div>
-            </div>
-            {% if user.is_authenticated and user.userrole.role == 'gerente' or user.userrole.role == 'administrador' %}     
-                <div class="mt-3">
-                    <a class="btn btn-success" href="{% url 'agregar' %}">Agregar un Cliente</a>
-                </div>
-                <br>
-                <!-- Botón para abrir el modal de vendedores -->
-                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#vendedorModal">
-                    Ver Vendedores
-                </button>
-
-                <!-- Modal para mostrar la tabla de vendedores -->
-                <div class="modal fade" id="vendedorModal" tabindex="-1" aria-labelledby="vendedorModalLabel" aria-hidden="true">
-                    <div class="modal-dialog">
-                        <div class="modal-content">
-                            <div class="modal-header">
-                                <h5 class="modal-title" id="vendedorModalLabel">Lista de Vendedores</h5>
-                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                            </div>
-                            <div class="modal-body">
-                                {% include 'vendedores/vendedor_modal_content.html' %}
-                            </div>
+                                <span class="current">
+                                    Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}.
+                                </span>
+                                {% if page_obj.has_next %}
+                                    <a href="?page={{ page_obj.next_page_number }}">siguiente</a>
+                                    <a href="?page={{ page_obj.paginator.num_pages }}">última &raquo;</a>
+                                {% endif %}
+                            </span>
                         </div>
                     </div>
+                    {% if user.is_authenticated and user.userrole.role == 'gerente' or user.userrole.role == 'administrador' %}     
+                        <div class="mt-3">
+                            <a class="btn btn-success" href="{% url 'agregar' %}">Agregar un Cliente</a>
+                        </div>
+                    {% endif %}
                 </div>
-            {% endif %}
+            </div>
+        </div>
+
+        <!-- Información detallada (lado derecho) -->
+        <div class="col-md-4">
+            <div id="detalle-cliente" class="card sticky-top" style="top: 20px; display: none;">
+                {% include 'clientes/informacion_cliente.html' %}
+            </div>
         </div>
     </div>
 </div>
+
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-    const vendedorModal = document.getElementById('vendedorModal');
-    
-    vendedorModal.addEventListener('click', function(e) {
-        if (e.target.classList.contains('vendedor-page-link')) {
-            e.preventDefault();
-            const page = e.target.getAttribute('data-page');
-            fetch(`?vendedor_page=${page}`, {
+document.addEventListener('DOMContentLoaded', function() {
+    const botonesMostrar = document.querySelectorAll('.btn-mostrar');
+    const detalleCliente = document.getElementById('detalle-cliente');
+
+    botonesMostrar.forEach(boton => {
+        boton.addEventListener('click', function() {
+            const clienteId = this.getAttribute('data-id');
+
+            fetch(`/clientes/${clienteId}/informacion/`, {
                 headers: {
                     'X-Requested-With': 'XMLHttpRequest'
                 }
             })
             .then(response => response.text())
             .then(html => {
-                vendedorModal.querySelector('.modal-body').innerHTML = html;
+                detalleCliente.innerHTML = html;
+                detalleCliente.style.display = 'block';
+            })
+            .catch(error => {
+                console.error('Error al cargar la información:', error);
             });
-        }
+        });
     });
 });
 </script>
 {% endblock %}
-

@@ -1,11 +1,16 @@
+import logging
 from typing import Any
 from django.db import models
-from datetime import timedelta
+from datetime import timedelta,datetime
+
+logger = logging.getLogger('clientes')
 
 class Vendedor(models.Model):
     id = models.AutoField(primary_key=True)
     nombre = models.CharField(max_length=100)
 
+    class Meta:
+        verbose_name_plural = "Vendedores"
     def __str__(self):
         return self.nombre
 
@@ -16,15 +21,15 @@ class Cliente(models.Model):
     curp = models.CharField(max_length=100, unique=True,  help_text="Clave Única de Registro de Población (CURP)")
     nss = models.CharField(max_length=100, unique=True, help_text="Número de Seguridad Social (NSS)")
     telefono = models.CharField(max_length=50, unique=True, null=True ,help_text="Numero de telefono del cliente")
-    fecha_de_firma = models.DateField(null=True ,blank=True, help_text="Fecha de Firma")
-    fecha_de_baja = models.DateField(null=True, blank=True, help_text="Fecha de Baja")
-    fecha_para_capturar_retiro = models.DateField(null=True,blank = True,help_text="Fecha para capturar retiro")
+    fecha_de_firma = models.CharField(max_length=50, null=True, blank=True, help_text="Fecha de Firma")
+    fecha_de_baja = models.CharField(max_length=50, null=True, blank=True, help_text="Fecha de Baja")
+    fecha_para_capturar_retiro = models.CharField(max_length=50, null=True, blank=True, help_text="Fecha para capturar retiro")
     observaciones = models.TextField(verbose_name="observaciones",null=True, blank=True,help_text="Observaciones del cliente")
     alta = models.CharField(max_length=100, null=True, blank=True,help_text="Alta")
-    vendedor = models.ForeignKey(Vendedor, on_delete=models.CASCADE, null=True,help_text="Vendedor al que pertenece el cliente")
+    vendedor = models.ForeignKey(Vendedor, on_delete=models.CASCADE, null=True, blank=True ,help_text="Vendedor al que pertenece el cliente")
     rcv = models.CharField(max_length=50,null=True,blank=True,help_text="RCV")
-    direccion = models.TextField(help_text="Dirección completa del cliente")
-    colonia = models.CharField(max_length=255, help_text="Colonia de residencia del cliente")
+    direccion = models.TextField(null=True, blank=True,help_text="Dirección completa del cliente")
+    colonia = models.CharField(blank=True,max_length=255, help_text="Colonia de residencia del cliente")
     fotografia = models.ImageField(upload_to='clientes/fotos/', null=True,blank=True,verbose_name="Foto", help_text="Fotografía del cliente")
 
     # Método para representar el cliente como una cadena 
@@ -41,9 +46,52 @@ class Cliente(models.Model):
     
     #funcion para calcular la fecha para el retiro
     def save(self, *args, **kwargs):
-        #calcular la fecha para el retiro
-        if self.fecha_de_baja:
-            self.fecha_para_capturar_retiro = self.fecha_de_baja + timedelta(days=46)
+        try:
+            if self.fecha_de_baja:
+                try:
+                    # Convertir la fecha de baja a formato correcto
+                    fecha_baja_str = self.fecha_de_baja.replace('/', '-')
+                    # Diccionario para convertir abreviaciones de meses a números
+                    meses = {
+                        'Ene': '01', 'Feb': '02', 'Mar': '03', 'Abr': '04',
+                        'May': '05', 'Jun': '06', 'Jul': '07', 'Ago': '08',
+                        'Sep': '09', 'Oct': '10', 'Nov': '11', 'Dic': '12',
+                        # Incluir también nombres completos por si acaso
+                        'Enero': '01', 'Febrero': '02', 'Marzo': '03', 'Abril': '04',
+                        'Mayo': '05', 'Junio': '06', 'Julio': '07', 'Agosto': '08',
+                        'Septiembre': '09', 'Octubre': '10', 'Noviembre': '11', 'Diciembre': '12'
+                    }
+                    # Separar el día y mes
+                    partes = fecha_baja_str.split('-')
+                    if len(partes) == 2:
+                        dia, mes = partes
+                        # Usar el año actual
+                        anio = str(datetime.now().year)
+                    else:
+                        dia, mes, anio = partes
+                    
+                    # Convertir el nombre del mes a número
+                    mes = meses.get(mes, mes)  # Si ya es número, se mantiene igual
+                    
+                    # Crear fecha en formato yyyy-mm-dd
+                    fecha_baja = datetime.strptime(f"{dia}-{mes}-{anio}", "%d-%m-%Y")
+                    
+                    # Calcular la fecha para capturar retiro (46 días después)
+                    fecha_retiro = fecha_baja + timedelta(days=46)
+                    
+                    # Formatear la fecha de retiro como dd-mmm-yy
+                    self.fecha_para_capturar_retiro = fecha_retiro.strftime("%d-%b-%y").replace(
+                        fecha_retiro.strftime("%b"),
+                        fecha_retiro.strftime("%b").capitalize()
+                    )
+                
+                except Exception as e:
+                    print(f"Error al calcular fecha_para_capturar_retiro: {e}")
+                    pass
+
+        except Exception as e:
+            logger.error(f"Error en Models Pago.Save(): {e}")
+            raise
         super().save(*args, **kwargs)
         
     # Método para definir la ordenación por defecto 

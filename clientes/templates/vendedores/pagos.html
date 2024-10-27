@@ -17,13 +17,25 @@
             {% endfor %}
         </select>
         <button type="submit">Ver Clientes</button>
+
+        <!-- Botón para abrir el modal de vendedores -->
+        <button type="button" data-bs-toggle="modal" data-bs-target="#vendedorModal">
+            Ver Vendedores
+        </button>
+
     </form>
     
     {% if vendedor_seleccionado %}
         <h2>Vendedor: {{ vendedor_seleccionado.nombre }}</h2>
         
-        {% for semana, clientes in pagos_por_semana.items %}
-            <h3>Semana {{ semana }}</h3>
+        {% for semana, datos in pagos_por_semana.items %}
+            {% if datos.clientes %}
+               
+                <h3><strong>SEMANA {{ semana }} DEL {{ datos.fecha_inicio|date:"d \d\e M"|upper }} AL {{ datos.fecha_fin|date:"d \d\e M"|upper }}</strong></h3>
+                
+            {% else %}
+                <h3>SEMANA {{ semana }} (sin clientes)</h3>
+            {% endif %}
             <table class="table">
                 <thead class="thead-dark">
                     <tr>
@@ -36,26 +48,32 @@
                         <th>Cantidad</th>
                         <th>Porcentaje</th>
                         <th>Anticipo</th>
-                        <th>Acciones</th>
+                        {% if user.is_authenticated and user.userrole.role == 'gerente' or user.userrole.role == 'administrador' %}
+                            <th>Acciones</th>
+                        {% endif %}
                     </tr>
                 </thead>
                 <tbody>
-                    {% for item in clientes %}
+                    {% for item in datos.clientes %}
                         <tr>
                             <td>{{ item.cliente.nombre }}</td>
                             <td>{{ item.cliente.fecha_de_firma }}</td>
                             <td>{{ item.cliente.fecha_para_capturar_retiro }}</td>
                             <td>{{ item.pago.observaciones|default:"-" }}</td>
-                            <td>{{ item.pago.fecha_de_pago|default:"-" }}</td>
+                            <td>{{ item.pago.fecha_de_pago|date:"d-M-y" }}</td>
                             <td>{{ item.pago.cancelacion|default:"-" }}</td>
                             <td>{{ item.pago.cantidad|default:"-" }}</td>
                             <td>{{ item.pago.porcentaje|default:"-" }}%</td>
                             <td>{{ item.pago.anticipo|default:"-" }}</td>
-                            <td>
-                                <a href="{% url 'agregar_editar_pago' cliente_id=item.cliente.id vendedor_id=vendedor_seleccionado.id %}" class="btn btn-primary">
-                                    Agregar o Editar Pagos
-                                </a>
-                            </td>
+                            {% if user.is_authenticated and user.userrole.role == 'gerente' or user.userrole.role == 'administrador' %}
+                                <div>
+                                    <td>
+                                        <a href="{% url 'agregar_editar_pago' cliente_id=item.cliente.id vendedor_id=vendedor_seleccionado.id %}" class="btn btn-primary">
+                                            Agregar o Editar Pagos
+                                        </a>
+                                    </td>
+                                </div>
+                            {% endif %}
                         </tr>
                     {% endfor %}
                 </tbody>
@@ -64,4 +82,40 @@
     {% else %}
         <p>Selecciona un vendedor para ver los clientes.</p>
     {% endif %}
+
+    <!-- Modal para mostrar la tabla de vendedores -->
+    <div class="modal fade" id="vendedorModal" tabindex="-1" aria-labelledby="vendedorModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="vendedorModalLabel">Lista de Vendedores</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    {% include 'vendedores/vendedor_modal_content.html' %}
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+        const vendedorModal = document.getElementById('vendedorModal');
+        
+        vendedorModal.addEventListener('click', function(e) {
+            if (e.target.classList.contains('vendedor-page-link')) {
+                e.preventDefault();
+                const page = e.target.getAttribute('data-page');
+                fetch(`?vendedor_page=${page}`, {
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                })
+                .then(response => response.text())
+                .then(html => {
+                    vendedorModal.querySelector('.modal-body').innerHTML = html;
+                });
+            }
+        });
+    });
+    </script>
 {% endblock %}

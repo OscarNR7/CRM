@@ -1,4 +1,3 @@
-<!-- templates/clientes/eliminar_cliente.html -->
 {% extends 'base.html' %}
 
 {% block titulo %} Home {% endblock %}
@@ -7,16 +6,16 @@
 <h2>¿Estás seguro de que deseas eliminar este cliente?</h2>
 
 <div>
-    <p>Nombre: {{ object.nombre }}</p>
-    <p>Apellido Paterno: {{ object.apellido_paterno }}</p>
-    <p>Apellido Materno: {{ object.apellido_materno }}</p>  
+    <p>Nombre: {{ object.nombre }}</p> 
     <p>CURP: {{ object.curp }}</p>
     <p>NSS: {{ object.nss }}</p>
+    <p>Teléfono: {{ object.telefono }}</p>
+    <p>Vendedor: {{ object.vendedor }}</p>
 </div>
 
 
 <div class="alert alert-warning" role="alert">
-    Al eliminar un cliente, se borrarán todos sus datos y las relaciones con otros objetos en la base de datos.
+    Al eliminar un cliente, se borrarán todos sus datos y las relaciones con el vendedor asignado.
 </div>
 
 <form method="post">

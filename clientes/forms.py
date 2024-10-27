@@ -4,6 +4,31 @@ from django.core.exceptions import ValidationError
 from datetime import datetime
 
 class ClienteForm(forms.ModelForm):
+    # Convertir los campos DateField a CharField
+    fecha_de_firma = forms.CharField(
+        required=False,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'DD-Mes-YYYY o DD/Mes/YYYY'
+        })
+    )
+    
+    fecha_de_baja = forms.CharField(
+        required=False,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'DD-Mes-YYYY o DD/Mes/YYYY'
+        })
+    )
+    
+    fecha_para_capturar_retiro = forms.CharField(
+        required=False,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'DD-Mes-YYYY o DD/Mes/YYYY'
+        })
+    )
+
     class Meta:
         model = Cliente
         fields = '__all__'
@@ -12,9 +37,6 @@ class ClienteForm(forms.ModelForm):
             'curp': forms.TextInput(attrs={'class': 'form-control'}),
             'nss': forms.TextInput(attrs={'class': 'form-control'}),
             'telefono': forms.TextInput(attrs={'class': 'form-control'}),
-            'fecha_de_firma': forms.DateInput(attrs={'class': 'form-control', 'placeholder': 'DD de Mes de YYYY'}),
-            'fecha_de_baja': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'DD-MMM'}),
-            'fecha_para_capturar_retiro': forms.DateInput(attrs={'class': 'form-control','type': 'date', 'placeholder': 'DD de Mes de YYYY'}),
             'observaciones': forms.TextInput(attrs={'class': 'form-control', 'rows': 2}),
             'direccion': forms.TextInput(attrs={'class': 'form-control', 'rows': 3}),
             'colonia': forms.TextInput(attrs={'class': 'form-control'}),
@@ -23,6 +45,53 @@ class ClienteForm(forms.ModelForm):
             'rcv': forms.TextInput(attrs={'class': 'form-control'}),
             'fotografia': forms.ClearableFileInput(attrs={'class': 'form-control'}),
         }
+
+    def clean_fecha_de_firma(self):
+        fecha = self.cleaned_data.get('fecha_de_firma')
+        if not fecha:
+            return None
+        try:
+            # Guardar la fecha como fue ingresada
+            return fecha
+        except:
+            return fecha
+
+    def clean_fecha_de_baja(self):
+        fecha = self.cleaned_data.get('fecha_de_baja')
+        if not fecha:
+            return None
+        try:
+            # Guardar la fecha como fue ingresada
+            return fecha
+        except:
+            return fecha
+
+    def clean_fecha_para_capturar_retiro(self):
+        fecha = self.cleaned_data.get('fecha_para_capturar_retiro')
+        if not fecha:
+            return None
+        try:
+            # Guardar la fecha como fue ingresada
+            return fecha
+        except:
+            return fecha
+
+    def save(self, commit=True):
+        instance = super().save(commit=False)
+        
+        # Guardar las fechas como texto en los campos
+        if self.cleaned_data.get('fecha_de_firma'):
+            instance.fecha_de_firma = self.cleaned_data.get('fecha_de_firma')
+        
+        if self.cleaned_data.get('fecha_de_baja'):
+            instance.fecha_de_baja = self.cleaned_data.get('fecha_de_baja')
+        
+        if self.cleaned_data.get('fecha_para_capturar_retiro'):
+            instance.fecha_para_capturar_retiro = self.cleaned_data.get('fecha_para_capturar_retiro')
+
+        if commit:
+            instance.save()
+        return instance
 
 class VendedorForm(forms.ModelForm):
     class Meta:

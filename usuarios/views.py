@@ -3,34 +3,51 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.contrib import messages
 from .models import UserRole
+from django.urls import reverse_lazy
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from usuarios.models import UserRole
 from django.contrib.auth import login, logout, authenticate
 from .forms import UserRoleAdminForm, UserAdminForm
 from .decorators import gerente_required, administrador_required
+from django.views.generic import DeleteView
+from django.utils.decorators import method_decorator
+from django.core.exceptions import ValidationError
 
 @login_required
 @gerente_required
 def administrar_usuarios(request):
-    usuarios = User.objects.all()
+    try:
+        usuarios = User.objects.all()
+    except Exception as e:
+        messages.error(request, f"Error al listar los usuarios: {e}")
+        return redirect('home')
+    
     return render(request, 'usuarios/listar_usuarios.html', {'usuarios': usuarios})
 
 @login_required
 @gerente_required
 def editar_usuario(request, user_id):
-    usuario = get_object_or_404(User, id=user_id)
-    user_role, created = UserRole.objects.get_or_create(user=usuario)
-    
-    if request.method == 'POST':
-        user_form = UserAdminForm(request.POST, instance=usuario)
-        role_form = UserRoleAdminForm(request.POST, instance=user_role)
-        if user_form.is_valid() and role_form.is_valid():
-            user_form.save()
-            role_form.save()
-            return redirect('administrar_usuarios')
-    else:
-        user_form = UserAdminForm(instance=usuario)
-        role_form = UserRoleAdminForm(instance=user_role)
+    try:
+        usuario = get_object_or_404(User, id=user_id)
+        user_role, created = UserRole.objects.get_or_create(user=usuario)
+        
+        if request.method == 'POST':
+            user_form = UserAdminForm(request.POST, instance=usuario)
+            role_form = UserRoleAdminForm(request.POST, instance=user_role)
+            if user_form.is_valid() and role_form.is_valid():
+                user_form.save()
+                role_form.save()
+                messages.success(request, "Usuario actualizado exitosamente.")
+                return redirect('administrar_usuarios')
+            else:
+                messages.error(request, "Error al actualizar usuario. Revise los campos e intente nuevamente.")
+    except Exception as e:
+        messages.error(request, f"Error al editar el usuario: {e}")
+        return redirect('administrar_usuarios')
+
+    user_form = UserAdminForm(instance=usuario)
+    role_form = UserRoleAdminForm(instance=user_role)
     
     return render(request, 'usuarios/editar_usuario.html', {
         'user_form': user_form, 
@@ -44,41 +61,65 @@ def crear_usuario(request):
     if request.method == 'POST':
         user_form = UserAdminForm(request.POST)
         role_form = UserRoleAdminForm(request.POST)
-        if user_form.is_valid() and role_form.is_valid():
-            user = user_form.save()
-            role = role_form.save(commit=False)
-            role.user = user
-            role.save()
+        try:
+            if user_form.is_valid() and role_form.is_valid():
+                user = user_form.save()
+                role = role_form.save(commit=False)
+                role.user = user
+                role.save()
+                messages.success(request, "Usuario creado exitosamente.")
+                return redirect('administrar_usuarios')
+            else:
+                messages.error(request, "Error al crear usuario. Verifique los datos ingresados.")
+        except Exception as e:
+            messages.error(request, f"Error al crear el usuario: {e}")
             return redirect('administrar_usuarios')
-    else:
-        user_form = UserAdminForm()
-        role_form = UserRoleAdminForm()
+    
+    user_form = UserAdminForm()
+    role_form = UserRoleAdminForm()
     
     return render(request, 'usuarios/crear_usuario.html', {
         'user_form': user_form, 
         'role_form': role_form
     })
 
-@login_required
-@gerente_required
-def eliminar_usuario(request, user_id):
-    usuario = get_object_or_404(User, id=user_id)
-    usuario.delete()
-    return redirect('administrar_usuarios')
+@method_decorator([gerente_required], name='dispatch')
+class EliminarUsuario(LoginRequiredMixin,DeleteView):
+    model = User
+    success_url = reverse_lazy('administrar_usuarios')
+    template_name = 'usuarios/user_confirm_delete.html'
+    
+    def delete(self, request, *args, **kwargs):
+        try:
+            usuario = self.get_object()
+            messages.success(request, f"Usuario {usuario.username} eliminado exitosamente.")
+            return super().delete(request, *args, **kwargs)
+        except Exception as e:
+            messages.error(request, f"Error al eliminar el usuario: {e}")
+            return redirect('administrar_usuarios')
+
 
 #-------------------------------------------------login------------------------------------------------
-
 
 def signup(request):
     if request.method == 'POST':
         form = UserCreationForm(request.POST)
-        if form.is_valid():
-            user = form.save()
-            UserRole.objects.create(user=user, role='supervisor')  # Rol por defecto
-            login(request, user)
-            return redirect('home')
+        try:
+            if form.is_valid():
+                user = form.save()
+                UserRole.objects.create(user=user, role='supervisor')  # Rol por defecto
+                login(request, user)
+                messages.success(request, "Usuario registrado y autenticado exitosamente.")
+                return redirect('home')
+            else:
+                messages.error(request, "Error en el registro. Verifique los datos.")
+        except ValidationError as e:
+            messages.error(request, f"Error de validación: {e}")
+        except Exception as e:
+            messages.error(request, f"Error al registrar el usuario: {e}")
     else:
         form = UserCreationForm()
+    
     return render(request, 'login/signup.html', {'form': form})
 
 #Funcion para cerrar sesión en el sistema
@@ -98,18 +139,25 @@ def signin(request):
         Args: request (HttpRequest): peticion HTTP
     '''
     if request.method == 'GET':
-        return render(request,'login/signin.html',{'form': AuthenticationForm})
+        return render(request, 'login/signin.html', {'form': AuthenticationForm()})
+
+    username = request.POST['username']
+    password = request.POST['password']
+    user = authenticate(request, username=username, password=password)
+
+    if user is None:
+        messages.error(request, 'Nombre de usuario o contraseña incorrectos')
+        return render(request, 'login/signin.html', {'form': AuthenticationForm()})
     else:
-        username = request.POST['username']
-        password = request.POST['password']
-        user = authenticate(request, username = username, password = password)
-        if user is None:
-            messages.error(request, 'Nombre de ususario o contraseña incorrectos')
-            return render(request,'login/signin.html',{'form': AuthenticationForm})
-        else:
-            login(request, user)
-            return redirect('home')
+        login(request, user)
+        messages.success(request, "Sesión iniciada exitosamente.")
+        return redirect('home')
     
 def profile(request):
-    usuario = User.objects.all()
-    return render(request, 'usuarios/profile.html', {'usuarios': usuario})
+    try:
+        usuario = request.user
+    except Exception as e:
+        messages.error(request, f"Error al cargar el perfil: {e}")
+        return redirect('home')
+    
+    return render(request, 'usuarios/profile.html', {'usuario': usuario})
