@@ -6,6 +6,7 @@ from django.core.paginator import Paginator
 from django.db.models import Q, Prefetch
 from django.db.models.functions import ExtractWeek
 from django.http import HttpResponse
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import render, redirect, get_object_or_404
 from django.template.loader import render_to_string
 from django.urls import reverse_lazy,reverse
@@ -39,7 +40,8 @@ def agregar_vendedor(request):
         logger.error(f"Error en agregar_vendedor: {e}")  # Registro del error
     return render(request, 'vendedores/pagos.html', {'vendedor_form': VendedorForm()})  
 
-class ListarVendedores(ListView):
+
+class ListarVendedores(LoginRequiredMixin,ListView):
     '''
         Lista todos los vendedores existentes en la base de datos.
         Args: request (HttpRequest): peticion HTTP.
@@ -66,7 +68,7 @@ def get_fechas_semana(numero_semana, año):
     
     return inicio_semana, fin_semana
 
-class PagosClientes(ListView):
+class PagosClientes(LoginRequiredMixin,ListView):
     model = Cliente
     template_name = 'vendedores/pagos.html'
     context_object_name = 'pagos_por_semana'

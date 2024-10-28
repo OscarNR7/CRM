@@ -28,7 +28,7 @@ logger = logging.getLogger('clientes')
 
 # Create your views here.
 #Renderiza la pagina de inicio
-class Home(TemplateView):
+class Home(LoginRequiredMixin,TemplateView):
     '''
     Renderiza la pagina de inicio con los detalles de la empresa
      Args: request (HttpRequest): peticion HTTP
