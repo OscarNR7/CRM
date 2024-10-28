@@ -137,3 +137,27 @@ class EliminarCliente(LoginRequiredMixin,DeleteView):
 def informacion_cliente(request, cliente_id):
     cliente = get_object_or_404(Cliente, id=cliente_id)
     return render(request, 'clientes/informacion_cliente.html', {'cliente': cliente, 'cliente_id': cliente_id})
+
+
+from django.contrib.auth import get_user_model
+from django.http import HttpResponse
+from django.conf import settings
+
+def create_admin(request):
+    # Token simple para validar - debes configurarlo en tus variables de entorno de Render
+    token = request.GET.get('token')
+    if token != settings.ADMIN_SECRET_TOKEN:  # Configura esto en tus variables de entorno
+        return HttpResponse('No autorizado', status=403)
+    
+    try:
+        User = get_user_model()
+        if not User.objects.filter(username='admin').exists():
+            usuario = User.objects.create_superuser(
+                username='oscarnr',
+                email='oscar@gmail.com',
+                password='12345'  # Cámbiala inmediatamente después
+            )
+            return HttpResponse('Superusuario creado con éxito!')
+        return HttpResponse('El superusuario ya existe')
+    except Exception as e:
+        return HttpResponse(f'Error: {str(e)}')
