@@ -50,12 +50,11 @@ MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
-    'django.middleware.locale.LocaleMiddleware',
+    'django.middleware.locale.LocaleMiddleware',#agregado para el cambio de idioma
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware',
 ]
 
 messages = {
@@ -118,22 +117,16 @@ AUTH_PASSWORD_VALIDATORS = [
 
 # settings.py
 
+import os
 
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
-    'formatters': {
-        'verbose': {
-            'format': '{levelname} {asctime} {module} {message}',
-            'style': '{',
-        },
-    },
     'handlers': {
         'file': {
             'level': 'ERROR',
             'class': 'logging.FileHandler',
-            'filename': os.path.join(BASE_DIR, 'logs/django.log'),
-            'formatter': 'verbose',
+            'filename': os.path.join(BASE_DIR, 'error.log'),  # Archivo de log en la raíz del proyecto
         },
     },
     'loggers': {
@@ -142,29 +135,19 @@ LOGGING = {
             'level': 'ERROR',
             'propagate': True,
         },
-        'clientes': {
+        'clientes': {  
             'handlers': ['file'],
             'level': 'ERROR',
             'propagate': False,
         },
-        'usuarios': {
+        'usuarios': {  
             'handlers': ['file'],
             'level': 'ERROR',
             'propagate': False,
         },
     },
 }
-# Configuración de seguridad esperando produccion
-# SECURE_SSL_REDIRECT = True
 
-# # HSTS (HTTP Strict Transport Security)
-# SECURE_HSTS_SECONDS = 31536000  # 1 año
-# SECURE_HSTS_INCLUDE_SUBDOMAINS = True
-# SECURE_HSTS_PRELOAD = True
-
-# # Filtros de seguridad adicionales
-# SECURE_BROWSER_XSS_FILTER = True
-# SECURE_CONTENT_TYPE_NOSNIFF = True
 
 # Internationalization
 # https://docs.djangoproject.com/en/5.1/topics/i18n/
@@ -184,14 +167,10 @@ LANGUAGES = [
 
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, 'static'),
     BASE_DIR / "static",  # Esto permite que Django sepa dónde buscar archivos estáticos
     BASE_DIR / "usuarios/static",  # Esto permite que Django sepa dónde buscar archivos estáticos
 
 ]
-#python manage.py collectstatic esto se hara antes de produccion
-STATIC_ROOT = os.path.join(BASE_DIR,'staticfiles')
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 LOGIN_URL = 'signin'
 
@@ -202,5 +181,3 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 MEDIA_ROOT = os.path.join(BASE_DIR, '')
 MEDIA_URL = '/clientes/fotos/'
-
-
