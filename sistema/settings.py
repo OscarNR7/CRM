@@ -207,3 +207,5 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 MEDIA_ROOT = os.path.join(BASE_DIR, '')
 MEDIA_URL = '/clientes/fotos/'
+
+ADMIN_SECRET_TOKEN = os.environ.get('ADMIN_SECRET_TOKEN', 'un_token_secreto_temporal')
