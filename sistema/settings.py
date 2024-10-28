@@ -148,6 +148,17 @@ LOGGING = {
     },
 }
 
+# Configuración de seguridad esperando produccion
+# SECURE_SSL_REDIRECT = True
+
+# #HSTS (HTTP Strict Transport Security)
+# SECURE_HSTS_SECONDS = 31536000  # 1 año
+# SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+# SECURE_HSTS_PRELOAD = True
+
+# # Filtros de seguridad adicionales
+# SECURE_BROWSER_XSS_FILTER = True
+# SECURE_CONTENT_TYPE_NOSNIFF = True
 
 # Internationalization
 # https://docs.djangoproject.com/en/5.1/topics/i18n/
@@ -167,10 +178,14 @@ LANGUAGES = [
 
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, 'static'),
     BASE_DIR / "static",  # Esto permite que Django sepa dónde buscar archivos estáticos
     BASE_DIR / "usuarios/static",  # Esto permite que Django sepa dónde buscar archivos estáticos
 
 ]
+#python manage.py collectstatic esto se hara antes de produccion
+STATIC_ROOT = os.path.join(BASE_DIR,'staticfiles')
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 LOGIN_URL = 'signin'
 
