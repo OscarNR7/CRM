@@ -1,0 +1,45 @@
+.pruebaB p{
+    background-color: brown;
+    color: aqua;
+}
+
+.btncen{
+    display: block;
+    margin: 5px;
+}
+
+.rbord{
+    border-radius: 15px; 
+}
+
+.padb{
+    padding-bottom: 5px;
+}
+
+.pagination{
+    color: #9ba3ff;
+    font-weight: bolder;
+}
+
+.card-head-clientes {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.bordBLR{
+    border-radius: 0 0 var(--bs-card-inner-border-radius) var(--bs-card-inner-border-radius);
+}
+
+#btnBuscar {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+    align-content: center;
+    align-items: center;
+}
+
+#btnBuscar p{
+    margin: 0px;
+}

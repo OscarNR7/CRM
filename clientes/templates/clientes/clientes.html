@@ -7,8 +7,11 @@
         <!-- Tabla principal (lado izquierdo) -->
         <div class="col-md-12">
             <div class="card">
-                <div class="card-header">
-                    <h2 class="mb-0">Lista de Clientes</h2>
+                <div class="card-header bg-dark text-light">
+                    <div class="card-head-clientes">
+                        <h2 class="mb-0">Lista de Clientes</h2>
+                        <i class="fa-regular fa-sun" style="color: #FFD43B;"></i>
+                    </div>
                     {% if messages %}
                         <div class="alert alert-danger" role="alert">
                             {% for message in messages %}
@@ -27,13 +30,18 @@
                             value="{{ request.GET.search|default:'' }}"
                             id="searchInput"
                             autocomplete="off">
-                        <button class="btn btn-outline-primary" type="submit">Buscar</button>
+                        <button class="btn btn-light" type="submit">
+                            <div id="btnBuscar">
+                                <p class="mx-1">Buscar</p>
+                                <i class="fa-solid fa-magnifying-glass mx-1"></i>
+                            </div>
+                        </button>
                     </form>
                 </div>
-                <div class="card-body">
-                    <div class="table-responsive">
-                        <table class="table table-bordered table-hover" style="table-layout: fixed;">
-                            <thead class="thead-dark">
+                <div class="card-body bg-dark bordBLR">
+                    <div class="table-responsive padb">
+                        <table class="table table-sm table-dark align-middle table-hover table-striped">
+                            <thead class="align-middle ">
                                 <tr>
                                     <th>ID</th>
                                     <th>Nombre</th>
@@ -47,13 +55,13 @@
                                     <th>Alta</th>
                                     <th>Vendedor</th>
                                     <th>RCV</th>
-                                    {% if user.is_authenticated and user.userrole.role == 'gerente' or user.userrole.role == 'administrador' %}
+                                    {% if user.is_authenticated and user.userrole.role == 'gerente' %}
                                         <th>Acciones</th>
                                     {% endif %}
                                     
                                 </tr>
                             </thead>
-                            <tbody>
+                            <tbody class="table-group-divider">
                                 {% for cliente in clientes %}
                                     <tr>
                                         <td>{{ cliente.id }}</td>
@@ -68,10 +76,10 @@
                                         <td>{{ cliente.alta }}</td>
                                         <td>{{ cliente.vendedor }}</td>
                                         <td>{{ cliente.rcv }}</td>
-                                        {% if user.is_authenticated and user.userrole.role == 'gerente' or user.userrole.role == 'administrador' %}
-                                            <td>
-                                                <a class="btn btn-sm btn-info" href="{% url 'editar' cliente.id %}">Editar</a>
-                                                <a class="btn btn-sm btn-danger" href="{% url 'eliminar' cliente.id %}">Eliminar</a>
+                                        {% if user.is_authenticated and user.userrole.role == 'gerente' %}
+                                            <td class="align-middle ">
+                                                <a class="btn btn-sm btncen btn-info" href="{% url 'editar' cliente.id %}">Editar</a>
+                                                <a class="btn btn-sm btncen btn-danger" href="{% url 'eliminar' cliente.id %}">Eliminar</a>
                                             </td>   
                                         {% endif %}
                                         
@@ -88,7 +96,7 @@
                                     <a href="?page={{ page_obj.previous_page_number }}">anterior</a>
                                 {% endif %}
                                 <span class="current">
-                                    Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}.
+                                    Página {{ page_obj.number }} / {{ page_obj.paginator.num_pages }}
                                 </span>
                                 {% if page_obj.has_next %}
                                     <a href="?page={{ page_obj.next_page_number }}">siguiente</a>

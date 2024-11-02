@@ -54,68 +54,7 @@ body {
   flex-direction: column;
   padding: 30px;
 }
-/*
-.logH{
-    height: 20%;
-    width: 100%;
-    color: black;
-    display: flex;
-    align-content: center;
-    flex-direction: row;
-    justify-content: center;
-    align-items: center;
-}
-.logAva{
-    display: flex;
-    height: 30%;
-    width: 100%;
-    align-items: center;
-    flex-direction: column;
-}
 
-#imgUser{
-    height: 100%;
-}
-.logF{
-    height: 50%;
-    width: 100%;
-}
-form{
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-}
-
-.logF p{
-    color: black !important;
-    display: flex;
-    flex-direction: column;
-    height: 30%;
-}
-
-.botonSum{
-    display: flex;
-    flex-direction: column;
-    height: 30%;
-    width: 100%;
-    align-items: center;
-    padding: 10px;
-}
-
-.btnIni{
-    width: 60%;
-    height: 100%;
-}
-
-#imgUser{
-
-}
-
-*/
-
-/* Estilo para el formulario de login */
-
-/* Encabezado del formulario */
 .logH {
   height: 10%;
   width: 100%;

@@ -4,90 +4,102 @@
 {% block titulo %}Pagos{% endblock %}
 
 {% block content %}
-    <h1>Pagos por Vendedor</h1>
+    <div class="card-head-clientes">
+        <h1>Pagos</h1>
+        <form class="d-flex flex-row p-2 gap-2 align-items-center" method="get" action="{% url 'pagos' %}">
+            <select class="form-select form-select-sm" name="vendedor" id="vendedor">
+                <option value="">-- Selecciona un vendedor --</option>
+                {% for vendedor in vendedores %}
+                    <option value="{{ vendedor.id }}" {% if vendedor_seleccionado.id == vendedor.id %}selected{% endif %}>
+                        {{ vendedor.nombre }}
+                    </option>
+                {% endfor %}
+            </select>
+            <button class="btn btn-dark text-nowrap" type="submit">Ver Clientes</button>
+
+            <!-- Botón para abrir el modal de vendedores -->
+            <button class="btn btn-dark text-nowrap" type="button" data-bs-toggle="modal" data-bs-target="#vendedorModal">
+                Ver Vendedores
+            </button>
+        </form>
+    </div>
+    <!--Mensaje error-->
+    {% if messages %}
+    <div class="alert alert-danger" role="alert">
+        {% for message in messages %}
+        {{ message }}
+        {% endfor %}
+    </div>
+    {% endif %} 
     
-    <form method="get" action="{% url 'pagos' %}">
-        <label for="vendedor">Selecciona un Vendedor:</label>
-        <select name="vendedor" id="vendedor">
-            <option value="">-- Selecciona un vendedor --</option>
-            {% for vendedor in vendedores %}
-                <option value="{{ vendedor.id }}" {% if vendedor_seleccionado.id == vendedor.id %}selected{% endif %}>
-                    {{ vendedor.nombre }}
-                </option>
-            {% endfor %}
-        </select>
-        <button type="submit">Ver Clientes</button>
+    <!--Tabla clientes-->
+    <div class="card">
+        {% if vendedor_seleccionado %}
+            <div class="card-header bg-dark text-light">
+                <h2>Vendedor: {{ vendedor_seleccionado.nombre }}</h2>
+            </div>
+            <div class="card-body bg-dark bordBLR">
+                {% for semana, datos in pagos_por_semana.items %}
+                    {% if datos.clientes %}
+                       
+                        <h3><strong>SEMANA {{ semana }} DEL {{ datos.fecha_inicio|date:"d \d\e M"|upper }} AL {{ datos.fecha_fin|date:"d \d\e M"|upper }}</strong></h3>
+                        
+                    {% else %}
+                        <h3>SEMANA {{ semana }} (sin clientes)</h3>
+                    {% endif %}
+                    <div class="table-responsive">
 
-        <!-- Botón para abrir el modal de vendedores -->
-        <button type="button" data-bs-toggle="modal" data-bs-target="#vendedorModal">
-            Ver Vendedores
-        </button>
-
-    </form>
-        {% if messages %}
-            <div class="alert alert-danger" role="alert">
-                {% for message in messages %}
-                    {{ message }}
+                        <table class="table table-sm table-dark align-middle table-hover table-striped">
+                            <thead class="align-middle">
+                                <tr>
+                                    <th>Nombre del Cliente</th>
+                                    <th>Fecha de Firma</th>
+                                    <th>46 Días</th>
+                                    <th>Observaciones</th>
+                                    <th>Fecha de Pago</th>
+                                    <th>Cancelación</th>
+                                    <th>Cantidad</th>
+                                    <th>Porcentaje</th>
+                                    <th>Anticipo</th>
+                                    {% if user.is_authenticated and user.userrole.role == 'gerente'%}
+                                        <th>Acciones</th>
+                                    {% endif %}
+                                </tr>
+                            </thead>
+                            <tbody class="table-group-divider">
+                                {% for item in datos.clientes %}
+                                    <tr>
+                                        <td>{{ item.cliente.nombre }}</td>
+                                        <td>{{ item.cliente.fecha_de_firma|date:"d-M-y" }}</td>
+                                        <td>{{ item.pago.F46dias|default:"-" }}</td>
+                                        <td>{{ item.pago.observaciones|default:"-" }}</td>
+                                        <td>{{ item.pago.fecha_de_pago|date:"d-M-y" }}</td>
+                                        <td>{{ item.pago.cancelacion|default:"-" }}</td>
+                                        <td>{{ item.pago.cantidad|default:"-" }}</td>
+                                        <td>{{ item.pago.porcentaje|default:"-" }}%</td>
+                                        <td>{{ item.pago.anticipo|default:"-" }}</td>
+                                        {% if user.is_authenticated and user.userrole.role == 'gerente' %}
+                                            <div>
+                                                <td class="align-middle">
+                                                    <a href="{% url 'agregar_editar_pago' cliente_id=item.cliente.id vendedor_id=vendedor_seleccionado.id %}" class="btn btn-primary btncen text-nowrap">
+                                                        Agregar<br/>Editar Pagos
+                                                    </a>
+                                                </td>
+                                            </div>
+                                        {% endif %}
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
                 {% endfor %}
             </div>
-        {% endif %} 
-    {% if vendedor_seleccionado %}
-        <h2>Vendedor: {{ vendedor_seleccionado.nombre }}</h2>
-        
-        {% for semana, datos in pagos_por_semana.items %}
-            {% if datos.clientes %}
-               
-                <h3><strong>SEMANA {{ semana }} DEL {{ datos.fecha_inicio|date:"d \d\e M"|upper }} AL {{ datos.fecha_fin|date:"d \d\e M"|upper }}</strong></h3>
-                
-            {% else %}
-                <h3>SEMANA {{ semana }} (sin clientes)</h3>
-            {% endif %}
-            <table class="table">
-                <thead class="thead-dark">
-                    <tr>
-                        <th>Nombre del Cliente</th>
-                        <th>Fecha de Firma</th>
-                        <th>46 Días</th>
-                        <th>Observaciones</th>
-                        <th>Fecha de Pago</th>
-                        <th>Cancelación</th>
-                        <th>Cantidad</th>
-                        <th>Porcentaje</th>
-                        <th>Anticipo</th>
-                        {% if user.is_authenticated and user.userrole.role == 'gerente' or user.userrole.role == 'administrador' %}
-                            <th>Acciones</th>
-                        {% endif %}
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for item in datos.clientes %}
-                        <tr>
-                            <td>{{ item.cliente.nombre }}</td>
-                            <td>{{ item.cliente.fecha_de_firma|date:"d-M-y" }}</td>
-                            <td>{{ item.pago.F46dias|default:"-" }}</td>
-                            <td>{{ item.pago.observaciones|default:"-" }}</td>
-                            <td>{{ item.pago.fecha_de_pago|date:"d-M-y" }}</td>
-                            <td>{{ item.pago.cancelacion|default:"-" }}</td>
-                            <td>{{ item.pago.cantidad|default:"-" }}</td>
-                            <td>{{ item.pago.porcentaje|default:"-" }}%</td>
-                            <td>{{ item.pago.anticipo|default:"-" }}</td>
-                            {% if user.is_authenticated and user.userrole.role == 'gerente' or user.userrole.role == 'administrador' %}
-                                <div>
-                                    <td>
-                                        <a href="{% url 'agregar_editar_pago' cliente_id=item.cliente.id vendedor_id=vendedor_seleccionado.id %}" class="btn btn-primary">
-                                            Agregar o Editar Pagos
-                                        </a>
-                                    </td>
-                                </div>
-                            {% endif %}
-                        </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        {% endfor %}
-    {% else %}
-        <p>Selecciona un vendedor para ver los clientes.</p>
-    {% endif %}
+        {% else %}
+            <div class="card-body text-bg-dark">
+                <p>Selecciona un vendedor para ver los clientes.</p>
+            </div>
+        {% endif %}
+    </div>
 
     <!-- Modal para mostrar la tabla de vendedores -->
     <div class="modal fade" id="vendedorModal" tabindex="-1" aria-labelledby="vendedorModalLabel" aria-hidden="true">
@@ -103,6 +115,8 @@
             </div>
         </div>
     </div>
+
+
     <script>
         document.addEventListener('DOMContentLoaded', function() {
         const vendedorModal = document.getElementById('vendedorModal');
