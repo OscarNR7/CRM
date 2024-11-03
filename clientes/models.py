@@ -1,6 +1,7 @@
 import logging
 from typing import Any
 from django.db import models
+from django.core.validators import MinValueValidator
 from datetime import timedelta,datetime
 
 logger = logging.getLogger('clientes')
@@ -20,7 +21,6 @@ class Cliente(models.Model):
     nombre = models.CharField(max_length=255, help_text="Nombre del cliente")
     curp = models.CharField(max_length=100, unique=True,  help_text="Clave Única de Registro de Población (CURP)")
     nss = models.CharField(max_length=100, unique=True, help_text="Número de Seguridad Social (NSS)")
-    #telefono = models.CharField(max_length=50, unique=True, null=True ,help_text="Numero de telefono del cliente")
     fecha_de_firma = models.DateField(null=True, blank=True, help_text="Fecha de Firma (DD/MM/YYYY)")
     fecha_de_baja = models.CharField(max_length=50, null=True, blank=True, help_text="Fecha de Baja")
     fecha_para_capturar_retiro = models.CharField(max_length=50, null=True, blank=True, help_text="Fecha para capturar retiro")
@@ -34,13 +34,10 @@ class Cliente(models.Model):
 
     #obtener telefonos de los clientes
     def get_telefonos_display(self):
-        '''Retorna los telefonos separados por /'''
         return '/'.join([telefono.numero for telefono in self.telefonos.all()])
     
     # Método para representar el cliente como una cadena 
     def __str__(self):
-        #fila= "Nombre" + self.nombre - "CURP" + self.curp - "NSS" + self.nss - "Colonia" + self.colonia
-        # return fila
         return f"{self.nombre}  - {self.curp} - {self.colonia}"
     
     def delete(self, *args, **kwargs):
@@ -127,11 +124,11 @@ class Telefono(models.Model):
 class Pago(models.Model):
     cliente = models.ForeignKey(Cliente, on_delete=models.CASCADE, related_name='pagos')
     fecha_de_pago = models.DateField(null=True, blank=True)
-    F46dias = models.DateField(null=True, blank=True)
+    F46dias = models.CharField(max_length=50, null=True, blank=True)
     cancelacion = models.CharField(max_length=50,blank=True, null=True)
-    cantidad = models.DecimalField(max_digits=10, decimal_places=2)
+    cantidad = models.DecimalField(max_digits=10, decimal_places=2,blank=True, null=True,validators=[MinValueValidator(0.0)])
     porcentaje = models.DecimalField(max_digits=5, decimal_places=2)
-    anticipo = models.DecimalField(max_digits=10, decimal_places=2)
+    anticipo = models.DecimalField(max_digits=10, decimal_places=2,null=True,blank=True)
     observaciones = models.TextField(blank=True, null=True)
 
     def save(self, *args, **kwargs):
