@@ -50,29 +50,36 @@ class ListarClientes(LoginRequiredMixin,ListView):
 
     def get_queryset(self):
         query = self.request.GET.get('search', '').strip()
+        orden = self.request.GET.get('orden', 'nombre')  # Orden por defecto es por nombre
         queryset = Cliente.objects.all()
         
+        # Filtrado de búsqueda
         if query:
             terms = query.split()
             search_filters = Q()
-
             for term in terms:
-                terms = query.split()
                 if term:
-                    search_filters |= ( Q(nombre__icontains=term) |
-                    Q(curp__icontains=term)| 
-                    Q(nss__icontains=term) |
-                    Q(direccion__icontains=term) | 
-                    Q(colonia__icontains=term) | 
-                    #Q(telefonos__icontains=term)  | 
-                    Q(vendedor__nombre__icontains=term)
-                    )
+                    search_filters |= (Q(nombre__icontains=term) |
+                                       Q(curp__icontains=term) |
+                                       Q(nss__icontains=term) |
+                                       Q(direccion__icontains=term) |
+                                       Q(colonia__icontains=term) |
+                                       Q(vendedor__nombre__icontains=term))
             queryset = queryset.filter(search_filters)
+        
+        # Ordenar por el criterio seleccionado
+        if orden == 'id':
+            queryset = queryset.order_by('id')
+        else:
+            queryset = queryset.order_by('nombre')
+        
         return queryset.distinct()
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['search_term'] = self.request.GET.get('search', '')
+        context['orden'] = self.request.GET.get('orden', 'nombre')
         return context
+
     
 #funcion para agregar un nuevo cliente
 @login_required
