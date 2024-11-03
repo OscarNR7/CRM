@@ -32,7 +32,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='pago',
             name='cancelacion',
-            field=models.BooleanField(default=False),
+            field=models.CharField(default=False),
         ),
         migrations.AlterField(
             model_name='pago',
