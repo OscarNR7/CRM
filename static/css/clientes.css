@@ -32,6 +32,10 @@
     border-radius: 0 0 var(--bs-card-inner-border-radius) var(--bs-card-inner-border-radius);
 }
 
+.bordesC{
+    border-radius:var(--bs-card-inner-border-radius);
+}
+
 #btnBuscar {
     display: flex;
     flex-direction: row;

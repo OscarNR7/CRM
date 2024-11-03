@@ -23,7 +23,7 @@
 
 /* Estilo para los otros enlaces de la barra de navegación */
 .nav-link {
-    color: white !important;
+    color: white 
 }
 
 /* Espaciado entre los elementos de la barra de navegación */
@@ -33,5 +33,10 @@
 
 /* Cambiar el color del botón en estado hover */
 .nav-link:hover {
-    color: #ccc !important;
+    color: #ccc;
 }
+
+.nav-noP{
+    --bs-navbar-brand-padding-y: 0px !important; 
+}
+
