@@ -38,6 +38,18 @@
                         </button>
                     </form>
                 </div>
+                <div class="card-header bg-dark text-light">
+                    <div class="ordenar-opciones">
+                        <!-- Enlaces de ordenación -->
+                        <a href="?orden=nombre{% if search_term %}&search={{ search_term }}{% endif %}" class="btn btn-outline-light btn-sm">
+                            Ordenar por Nombre
+                        </a>
+                        <a href="?orden=id{% if search_term %}&search={{ search_term }}{% endif %}" class="btn btn-outline-light btn-sm">
+                            Ordenar por ID
+                        </a>
+                    </div>
+                </div>
+                
                 <div class="card-body bg-dark bordBLR">
                     <div class="table-responsive padb">
                         <table class="table table-sm table-dark align-middle table-hover table-striped">
@@ -68,7 +80,7 @@
                                         <td>{{ cliente.nombre }}</td>
                                         <td>{{ cliente.curp }}</td>
                                         <td>{{ cliente.nss }}</td>
-                                        <td>{{ cliente.telefono }}</td>
+                                        <td>{{ cliente.get_telefonos_display }}</td>
                                         <td>{{ cliente.fecha_de_firma|date:"d/m/Y" }}</td>
                                         <td>{{ cliente.fecha_de_baja }}</td>
                                         <td>{{ cliente.fecha_para_capturar_retiro }}</td>
@@ -92,19 +104,19 @@
                         <div class="pagination">
                             <span class="step-links">
                                 {% if page_obj.has_previous %}
-                                    <a href="?page=1">&laquo; primera</a>
-                                    <a href="?page={{ page_obj.previous_page_number }}">anterior</a>
+                                    <a href="?page=1{% if search_term %}&search={{ search_term }}{% endif %}{% if orden %}&orden={{ orden }}{% endif %}">&laquo; primera</a>
+                                    <a href="?page={{ page_obj.previous_page_number }}{% if search_term %}&search={{ search_term }}{% endif %}{% if orden %}&orden={{ orden }}{% endif %}">anterior</a>
                                 {% endif %}
                                 <span class="current">
-                                    Página {{ page_obj.number }} / {{ page_obj.paginator.num_pages }}
+                                    Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}
                                 </span>
                                 {% if page_obj.has_next %}
-                                    <a href="?page={{ page_obj.next_page_number }}">siguiente</a>
-                                    <a href="?page={{ page_obj.paginator.num_pages }}">última &raquo;</a>
+                                    <a href="?page={{ page_obj.next_page_number }}{% if search_term %}&search={{ search_term }}{% endif %}{% if orden %}&orden={{ orden }}{% endif %}">siguiente</a>
+                                    <a href="?page={{ page_obj.paginator.num_pages }}{% if search_term %}&search={{ search_term }}{% endif %}{% if orden %}&orden={{ orden }}{% endif %}">última &raquo;</a>
                                 {% endif %}
                             </span>
                         </div>
-                    </div>
+                        
                     {% if user.is_authenticated and user.userrole.role == 'gerente' or user.userrole.role == 'administrador' %}     
                         <div class="mt-3">
                             <a class="btn btn-success" href="{% url 'agregar' %}">Agregar un Cliente</a>

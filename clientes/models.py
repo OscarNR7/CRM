@@ -20,7 +20,7 @@ class Cliente(models.Model):
     nombre = models.CharField(max_length=255, help_text="Nombre del cliente")
     curp = models.CharField(max_length=100, unique=True,  help_text="Clave Única de Registro de Población (CURP)")
     nss = models.CharField(max_length=100, unique=True, help_text="Número de Seguridad Social (NSS)")
-    telefono = models.CharField(max_length=50, unique=True, null=True ,help_text="Numero de telefono del cliente")
+    #telefono = models.CharField(max_length=50, unique=True, null=True ,help_text="Numero de telefono del cliente")
     fecha_de_firma = models.DateField(null=True, blank=True, help_text="Fecha de Firma (DD/MM/YYYY)")
     fecha_de_baja = models.CharField(max_length=50, null=True, blank=True, help_text="Fecha de Baja")
     fecha_para_capturar_retiro = models.CharField(max_length=50, null=True, blank=True, help_text="Fecha para capturar retiro")
@@ -32,6 +32,11 @@ class Cliente(models.Model):
     colonia = models.CharField(blank=True,max_length=255, help_text="Colonia de residencia del cliente")
     fotografia = models.ImageField(upload_to='clientes/fotos/', null=True,blank=True,verbose_name="Foto", help_text="Fotografía del cliente")
 
+    #obtener telefonos de los clientes
+    def get_telefonos_display(self):
+        '''Retorna los telefonos separados por /'''
+        return '/'.join([telefono.numero for telefono in self.telefonos.all()])
+    
     # Método para representar el cliente como una cadena 
     def __str__(self):
         #fila= "Nombre" + self.nombre - "CURP" + self.curp - "NSS" + self.nss - "Colonia" + self.colonia
@@ -112,6 +117,13 @@ class Cliente(models.Model):
         verbose_name = 'Cliente'
         verbose_name_plural = 'Clientes'
 
+class Telefono(models.Model):
+    cliente = models.ForeignKey(Cliente, on_delete=models.CASCADE, related_name='telefonos')
+    numero = models.CharField(max_length=50,blank=True,null=True)
+
+    def __str__(self):
+        return f"{self.numero} - {self.cliente.nombre}"
+    
 class Pago(models.Model):
     cliente = models.ForeignKey(Cliente, on_delete=models.CASCADE, related_name='pagos')
     fecha_de_pago = models.DateField(null=True, blank=True)
