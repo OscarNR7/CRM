@@ -20,7 +20,7 @@ from clientes import views
 from usuarios import views
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
+    path('kavajo-admin-xl2@/', admin.site.urls),
     path('',include('clientes.urls')),
     path('',include('usuarios.urls')),
 ]
