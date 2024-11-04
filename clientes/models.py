@@ -3,6 +3,7 @@ from typing import Any
 from django.db import models
 from django.core.validators import MinValueValidator
 from datetime import timedelta,datetime
+from cloudinary.models import CloudinaryField
 
 logger = logging.getLogger('clientes')
 
@@ -36,9 +37,22 @@ class Cliente(models.Model):
     direccion = models.TextField(null=True, blank=True,help_text="Dirección completa del cliente")
     colonia = models.CharField(blank=True,max_length=255, help_text="Colonia de residencia del cliente")
     cambio_de_afore = models.CharField(max_length=20,choices=OPCIONES_ESTADO,null=True, blank=True)
-    fotografia = models.ImageField(upload_to='clientes/fotos/', null=True,blank=True,verbose_name="Foto", help_text="Fotografía del cliente")
-    foto_aval = models.ImageField(upload_to='clientes/fotos/', null= True,blank=True,verbose_name='Foto',help_text="Fotografia del Aval")
 
+    fotografia = CloudinaryField(
+        'image',
+        folder='fotos',  # carpeta en Cloudinary
+        null=True,
+        blank=True,
+        verbose_name='Fotografía'
+    )
+    
+    foto_aval = CloudinaryField(
+        'image',
+        folder='fotos_aval',  # carpeta en Cloudinary
+        null=True,
+        blank=True,
+        verbose_name='Foto del Aval'
+    )
     #obtener telefonos de los clientes
     def get_telefonos_display(self):
         return '/'.join([telefono.numero for telefono in self.telefonos.all()])

@@ -107,14 +107,22 @@ Clientes
 
                                         <td>
                                             {% if cliente.fotografia %}
-                                                <img src="{{ cliente.fotografia.url }}" height="50" class="thumbnail" onclick="mostrarImagen(this.src)">
+                                                <img src="{{ cliente.fotografia.url }}" 
+                                                     height="50" 
+                                                     class="thumbnail" 
+                                                     onclick="mostrarImagen(this.src)"
+                                                     loading="lazy">
                                             {% else %}
                                                 Sin fotografía
                                             {% endif %}
                                         </td>
                                         <td>
                                             {% if cliente.foto_aval %}
-                                                <img src="{{ cliente.foto_aval.url }}" height="50" class="thumbnail" onclick="mostrarImagen(this.src)">   
+                                                <img src="{{ cliente.foto_aval.url }}" 
+                                                     height="50" 
+                                                     class="thumbnail" 
+                                                     onclick="mostrarImagen(this.src)"
+                                                     loading="lazy">
                                             {% else %}
                                                 Sin aval
                                             {% endif %}
