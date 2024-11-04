@@ -1,20 +1,24 @@
+# Importaciones de Django
 from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth.decorators import login_required
-from django.contrib.auth.models import User
 from django.contrib import messages
-from .models import *
-from .clean_logs import *
+from django.contrib.auth import login, logout, authenticate
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.models import User
+from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
+from django.core.exceptions import ValidationError
 from django.core.paginator import Paginator
 from django.urls import reverse_lazy
-from django.contrib.auth.mixins import LoginRequiredMixin
-from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
-from usuarios.models import UserRole
-from django.contrib.auth import login, logout, authenticate
+from django.utils.decorators import method_decorator
+from django.views.generic import DeleteView
+
+# Importaciones de aplicaciones locales
+from .models import *
 from .forms import UserRoleAdminForm, UserAdminForm
 from .decorators import gerente_required, administrador_required
-from django.views.generic import DeleteView
-from django.utils.decorators import method_decorator
-from django.core.exceptions import ValidationError
+from .clean_logs import *
+from usuarios.models import UserRole
+
 
 @login_required
 @gerente_required

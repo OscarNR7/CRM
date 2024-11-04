@@ -16,6 +16,11 @@ class Vendedor(models.Model):
         return self.nombre
 
 class Cliente(models.Model):
+    OPCIONES_ESTADO = [
+        ('no_necesario', 'No necesario'),
+        ('necesario', 'Necesario'),
+        ('pendiente', 'Pendiente'),
+    ]
     #Definición de los campos para almacenar la información de los clientes
     id = models.AutoField(primary_key=True)
     nombre = models.CharField(max_length=255, help_text="Nombre del cliente")
@@ -30,7 +35,9 @@ class Cliente(models.Model):
     rcv = models.CharField(max_length=50,null=True,blank=True,help_text="RCV")
     direccion = models.TextField(null=True, blank=True,help_text="Dirección completa del cliente")
     colonia = models.CharField(blank=True,max_length=255, help_text="Colonia de residencia del cliente")
+    cambio_de_afore = models.CharField(max_length=20,choices=OPCIONES_ESTADO,null=True, blank=True)
     fotografia = models.ImageField(upload_to='clientes/fotos/', null=True,blank=True,verbose_name="Foto", help_text="Fotografía del cliente")
+    foto_aval = models.ImageField(upload_to='clientes/fotos/', null= True,blank=True,verbose_name='Foto',help_text="Fotografia del Aval")
 
     #obtener telefonos de los clientes
     def get_telefonos_display(self):
@@ -42,8 +49,9 @@ class Cliente(models.Model):
     
     def delete(self, *args, **kwargs):
         # Verificar si hay una fotografía antes de intentar eliminarla
-        if self.fotografia and self.fotografia.name:
+        if self.fotografia and self.fotografia.name and self.foto_aval and self.foto_aval.name:
             self.fotografia.delete()
+            self.foto_aval.delete()
         super().delete(*args, **kwargs)
     
     #funcion para calcular la fecha para el retiro

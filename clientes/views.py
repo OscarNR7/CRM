@@ -1,7 +1,9 @@
+# Importaciones de librerías estándar de Python
 import os
 import logging
 from datetime import datetime
 
+# Importaciones de Django
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -12,19 +14,18 @@ from django.db import IntegrityError
 from django.db.models import Q, Prefetch
 from django.db.models.functions import ExtractWeek
 from django.http import HttpResponse, JsonResponse
-from django.views.decorators.http import require_POST
-from django.shortcuts import render, redirect, get_object_or_404,HttpResponseRedirect
+from django.shortcuts import render, redirect, get_object_or_404, HttpResponseRedirect
 from django.template.loader import render_to_string
-from django.urls import reverse_lazy,reverse
-from django.views.generic import TemplateView, ListView, UpdateView, DeleteView, CreateView, FormView
+from django.urls import reverse_lazy, reverse
 from django.utils.decorators import method_decorator
+from django.views.decorators.http import require_POST
+from django.views.generic import TemplateView, ListView, UpdateView, DeleteView, CreateView, FormView
 
-
+# Importaciones de la aplicación local
 from .forms import *
 from .models import *
 from usuarios.decorators import gerente_required, administrador_required
 from usuarios.views import log_user_activity
-from django.conf import settings
 
 logger = logging.getLogger('clientes')
 

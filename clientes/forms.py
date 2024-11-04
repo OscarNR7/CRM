@@ -49,10 +49,12 @@ class ClienteForm(forms.ModelForm):
             'observaciones': forms.TextInput(attrs={'class': 'form-control', 'rows': 2}),
             'direccion': forms.TextInput(attrs={'class': 'form-control', 'rows': 3}),
             'colonia': forms.TextInput(attrs={'class': 'form-control'}),
+            'cambio_de_afore': forms.Select(attrs={'class': 'form-control'}),
             'alta': forms.TextInput(attrs={'class': 'form-control'}),           
             'vendedor': forms.Select(attrs={'class': 'form-control'}),
             'rcv': forms.TextInput(attrs={'class': 'form-control'}),
             'fotografia': forms.ClearableFileInput(attrs={'class': 'form-control'}),
+            'foto_aval': forms.ClearableFileInput(attrs={'class': 'form-control'}),
         }
 
     def clean_fecha_de_firma(self):

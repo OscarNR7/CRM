@@ -1,27 +1,31 @@
+# Importaciones estándar de Python
 import logging
+from datetime import datetime, timedelta, date
+
+# Librerías de terceros
 from isoweek import Week
+
+# Importaciones de Django
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.core.paginator import Paginator
-from django.db.models import Q, Prefetch
-from django.db.models.functions import ExtractWeek
-from django.http import HttpResponse
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.core.paginator import Paginator
+from django.db.models import Q, Prefetch, DateField
+from django.db.models.functions import Cast, ExtractWeek
+from django.http import HttpResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.template.loader import render_to_string
-from django.urls import reverse_lazy,reverse
-from django.views.generic import ListView,DeleteView
+from django.urls import reverse_lazy, reverse
 from django.utils.decorators import method_decorator
-from datetime import datetime,timedelta,date
+from django.views.generic import ListView, DeleteView
 
+# Importaciones de la aplicación local
 from .forms import *
 from .models import *
-from django.db.models import DateField
-from django.db.models.functions import Cast, ExtractWeek
 from usuarios.decorators import gerente_required, administrador_required
 from usuarios.views import log_user_activity
-from django.conf import settings
+
 
 logger = logging.getLogger('clientes')
 
