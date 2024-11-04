@@ -39,19 +39,19 @@ class Cliente(models.Model):
     cambio_de_afore = models.CharField(max_length=20,choices=OPCIONES_ESTADO,null=True, blank=True)
 
     fotografia = CloudinaryField(
-        'image',
-        folder='fotos',  # carpeta en Cloudinary
+        verbose_name='Fotografía del cliente',
+        resource_type='image',
+        folder='fotos',
         null=True,
-        blank=True,
-        verbose_name='Fotografia del cliente'
+        blank=True
     )
     
     foto_aval = CloudinaryField(
-        'image',
-        folder='fotos_aval',  # carpeta en Cloudinary
+        verbose_name='Foto del Aval',
+        resource_type='image',
+        folder='fotos_aval',
         null=True,
-        blank=True,
-        verbose_name='Foto del Aval'
+        blank=True
     )
     #obtener telefonos de los clientes
     def get_telefonos_display(self):
