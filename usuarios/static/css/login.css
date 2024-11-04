@@ -1,6 +1,6 @@
 * {
   margin: 0;
-  font-family: "Lexend Deca", sans-serif !important;
+  font-family: "Lexend Deca", sans-serif ;
 }
 
 body {
@@ -30,7 +30,6 @@ body {
   min-height: 200px; /* Mínima altura para evitar que se deforme en pantallas pequeñas */
   display: flex;
   flex-direction: row;
-  border-radius: 12px;
   box-shadow: 14px 12px 13.5px 4px rgba(0, 0, 0, 0.384); /* Sombra */
   box-sizing: border-box; /* Incluir padding en el cálculo del ancho y altura */
 }
