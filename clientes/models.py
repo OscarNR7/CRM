@@ -43,7 +43,7 @@ class Cliente(models.Model):
         folder='fotos',  # carpeta en Cloudinary
         null=True,
         blank=True,
-        verbose_name='Fotografía'
+        verbose_name='Fotografia del cliente'
     )
     
     foto_aval = CloudinaryField(
