@@ -1,8 +1,22 @@
 from django import forms
 from .models import *
 from django.core.exceptions import ValidationError
+from django.forms import modelformset_factory
 from datetime import datetime
 
+class TelefonoForm(forms.ModelForm):
+    class Meta:
+        model = Telefono
+        fields = ['numero']
+        widgets = {
+            'numero': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese número telefónico'})
+        }
+TelefonoFormSet = modelformset_factory(
+    Telefono,
+    form=TelefonoForm,
+    extra=0,
+    can_delete=True
+)
 class ClienteForm(forms.ModelForm):
     # Convertir los campos DateField a CharField
     fecha_de_baja = forms.CharField(
@@ -24,6 +38,7 @@ class ClienteForm(forms.ModelForm):
 
     class Meta:
         model = Cliente
+        exclude = ['telefono'] 
         fields = '__all__'
         widgets = {
             'nombre': forms.TextInput(attrs={'class': 'form-control'}),
@@ -34,10 +49,12 @@ class ClienteForm(forms.ModelForm):
             'observaciones': forms.TextInput(attrs={'class': 'form-control', 'rows': 2}),
             'direccion': forms.TextInput(attrs={'class': 'form-control', 'rows': 3}),
             'colonia': forms.TextInput(attrs={'class': 'form-control'}),
+            'cambio_de_afore': forms.Select(attrs={'class': 'form-control'}),
             'alta': forms.TextInput(attrs={'class': 'form-control'}),           
             'vendedor': forms.Select(attrs={'class': 'form-control'}),
             'rcv': forms.TextInput(attrs={'class': 'form-control'}),
             'fotografia': forms.ClearableFileInput(attrs={'class': 'form-control'}),
+            'foto_aval': forms.ClearableFileInput(attrs={'class': 'form-control'}),
         }
 
     def clean_fecha_de_firma(self):

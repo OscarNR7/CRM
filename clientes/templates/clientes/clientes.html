@@ -1,7 +1,10 @@
 {% extends 'base.html' %}
-{% block titulo %}Clientes{% endblock %}
-{% block content %}
 
+{% block titulo %}
+Clientes
+{% endblock %}
+
+{% block content %}
 <div class="container-fluid mt-4">
     <div class="row">
         <!-- Tabla principal (lado izquierdo) -->
@@ -19,7 +22,8 @@
                             {% endfor %}
                         </div>
                     {% endif %}
-                    <!--Buscador-->
+
+                    <!-- Formulario de búsqueda -->
                     <form method="GET" action="{% url 'clientes' %}" class="d-flex mt-3" role="search" id="searchForm">
                         <input 
                             class="form-control me-2" 
@@ -38,27 +42,45 @@
                         </button>
                     </form>
                 </div>
+
+                <!-- Opciones de ordenación -->
+                <div class="card-header bg-dark text-light">
+                    <div class="ordenar-opciones">
+                        <a href="?orden=nombre{% if search_term %}&search={{ search_term }}{% endif %}" class="btn btn-outline-light btn-sm">
+                            Ordenar por Nombre
+                        </a>
+                        <a href="?orden=id{% if search_term %}&search={{ search_term }}{% endif %}" class="btn btn-outline-light btn-sm">
+                            Ordenar por ID
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Cuerpo de la tabla -->
                 <div class="card-body bg-dark bordBLR">
                     <div class="table-responsive padb">
                         <table class="table table-sm table-dark align-middle table-hover table-striped">
-                            <thead class="align-middle ">
+                            <thead class="align-middle">
                                 <tr>
                                     <th>ID</th>
                                     <th>Nombre</th>
                                     <th>CURP</th>
                                     <th>NSS</th>
-                                    <th>Telefono</th>
+                                    <th>Teléfono</th>
                                     <th>Fecha de Firma</th>
                                     <th>Fecha de Baja</th>
-                                    <th>Fecha Para Capturar Retiro</th>
+                                    <th>Fecha para Capturar Retiro</th>
                                     <th>Observaciones</th>
                                     <th>Alta</th>
                                     <th>Vendedor</th>
                                     <th>RCV</th>
+                                    <th>Dirección</th>
+                                    <th>Colonia</th>
+                                    <th>Cambio de Afore</th>
+                                    <th>Fotografía</th>
+                                    <th>Aval</th>
                                     {% if user.is_authenticated and user.userrole.role == 'gerente' %}
                                         <th>Acciones</th>
                                     {% endif %}
-                                    
                                 </tr>
                             </thead>
                             <tbody class="table-group-divider">
@@ -68,7 +90,7 @@
                                         <td>{{ cliente.nombre }}</td>
                                         <td>{{ cliente.curp }}</td>
                                         <td>{{ cliente.nss }}</td>
-                                        <td>{{ cliente.telefono }}</td>
+                                        <td>{{ cliente.get_telefonos_display }}</td>
                                         <td>{{ cliente.fecha_de_firma|date:"d/m/Y" }}</td>
                                         <td>{{ cliente.fecha_de_baja }}</td>
                                         <td>{{ cliente.fecha_para_capturar_retiro }}</td>
@@ -76,13 +98,34 @@
                                         <td>{{ cliente.alta }}</td>
                                         <td>{{ cliente.vendedor }}</td>
                                         <td>{{ cliente.rcv }}</td>
+                                        <td>{{ cliente.direccion }}</td>
+                                        <td>{{ cliente.colonia }}</td>
+
+                                        <td class="{% if cliente.cambio_de_afore == 'pendiente' %}text-warning{% endif %}">
+                                            {{ cliente.cambio_de_afore }}
+                                        </td>
+
+                                        <td>
+                                            {% if cliente.fotografia %}
+                                                <img src="{{ cliente.fotografia.url }}" height="50" class="thumbnail" onclick="mostrarImagen(this.src)">
+                                            {% else %}
+                                                Sin fotografía
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if cliente.foto_aval %}
+                                                <img src="{{ cliente.foto_aval.url }}" height="50" class="thumbnail" onclick="mostrarImagen(this.src)">   
+                                            {% else %}
+                                                Sin aval
+                                            {% endif %}
+                                        </td>
+
                                         {% if user.is_authenticated and user.userrole.role == 'gerente' %}
-                                            <td class="align-middle ">
+                                            <td class="align-middle">
                                                 <a class="btn btn-sm btncen btn-info" href="{% url 'editar' cliente.id %}">Editar</a>
                                                 <a class="btn btn-sm btncen btn-danger" href="{% url 'eliminar' cliente.id %}">Eliminar</a>
                                             </td>   
                                         {% endif %}
-                                        
                                     </tr>
                                 {% endfor %}
                             </tbody>
@@ -92,24 +135,26 @@
                         <div class="pagination">
                             <span class="step-links">
                                 {% if page_obj.has_previous %}
-                                    <a href="?page=1">&laquo; primera</a>
-                                    <a href="?page={{ page_obj.previous_page_number }}">anterior</a>
+                                    <a href="?page=1{% if search_term %}&search={{ search_term }}{% endif %}{% if orden %}&orden={{ orden }}{% endif %}">&laquo; primera</a>
+                                    <a href="?page={{ page_obj.previous_page_number }}{% if search_term %}&search={{ search_term }}{% endif %}{% if orden %}&orden={{ orden }}{% endif %}">anterior</a>
                                 {% endif %}
                                 <span class="current">
-                                    Página {{ page_obj.number }} / {{ page_obj.paginator.num_pages }}
+                                    Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}
                                 </span>
                                 {% if page_obj.has_next %}
-                                    <a href="?page={{ page_obj.next_page_number }}">siguiente</a>
-                                    <a href="?page={{ page_obj.paginator.num_pages }}">última &raquo;</a>
+                                    <a href="?page={{ page_obj.next_page_number }}{% if search_term %}&search={{ search_term }}{% endif %}{% if orden %}&orden={{ orden }}{% endif %}">siguiente</a>
+                                    <a href="?page={{ page_obj.paginator.num_pages }}{% if search_term %}&search={{ search_term }}{% endif %}{% if orden %}&orden={{ orden }}{% endif %}">última &raquo;</a>
                                 {% endif %}
                             </span>
                         </div>
+                        
+                        <!-- Botón para agregar un nuevo cliente -->
+                        {% if user.is_authenticated and user.userrole.role == 'gerente' or user.userrole.role == 'administrador' %}
+                            <div class="mt-3">
+                                <a class="btn btn-success" href="{% url 'agregar' %}">Agregar un Cliente</a>
+                            </div>
+                        {% endif %}
                     </div>
-                    {% if user.is_authenticated and user.userrole.role == 'gerente' or user.userrole.role == 'administrador' %}     
-                        <div class="mt-3">
-                            <a class="btn btn-success" href="{% url 'agregar' %}">Agregar un Cliente</a>
-                        </div>
-                    {% endif %}
                 </div>
             </div>
         </div>
@@ -123,67 +168,169 @@
     </div>
 </div>
 
+<!-- Modal para imagen ampliada -->
+<div id="imagen-ampliada" class="imagen-ampliada" onclick="cerrarImagen()">
+    <div class="imagen-contenedor">
+        <button class="btn-cerrar" onclick="cerrarImagen()">×</button>
+        <img id="imagen-grande" src="" alt="Imagen ampliada">
+        <div class="controles">
+            <button class="btn-navegacion btn-prev" onclick="navegarImagen(-1)">&#10094;</button>
+            <button class="btn-navegacion btn-next" onclick="navegarImagen(1)">&#10095;</button>
+        </div>
+    </div>
+</div>
+<!-- Estilos -->
+<style>
+    /* Estilo para el modal de imagen ampliada */
+    .imagen-ampliada {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.9);
+        z-index: 1000;
+        justify-content: center;
+        align-items: center;
+    }
+
+    /* Contenedor de la imagen ampliada */
+    .imagen-contenedor {
+        position: relative;
+        max-width: 90%;
+        max-height: 90%;
+    }
+
+    /* Imagen dentro del contenedor */
+    .imagen-contenedor img {
+        max-width: 100%;
+        max-height: 90vh;
+        object-fit: contain;
+        border-radius: 4px;
+        box-shadow: 0 0 20px rgba(0,0,0,0.3);
+    }
+
+    /* Botón de cierre */
+    .btn-cerrar {
+        position: absolute;
+        right: -40px;
+        top: -40px;
+        background: none;
+        border: none;
+        color: white;
+        font-size: 30px;
+        cursor: pointer;
+        padding: 10px;
+        z-index: 1001;
+    }
+
+    /* Botones de navegación */
+    .btn-navegacion {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        background: rgba(255, 255, 255, 0.1);
+        border: none;
+        color: white;
+        padding: 15px;
+        cursor: pointer;
+        font-size: 24px;
+        border-radius: 50%;
+        transition: background-color 0.3s;
+    }
+
+    /* Hover en botones de navegación */
+    .btn-navegacion:hover {
+        background: rgba(255, 255, 255, 0.2);
+    }
+
+    /* Posicionamiento de botones de navegación */
+    .btn-prev {
+        left: -60px;
+    }
+
+    .btn-next {
+        right: -60px;
+    }
+
+    /* Estilo para miniaturas */
+    .thumbnail {
+        cursor: pointer;
+        transition: transform 0.2s;
+    }
+
+    /* Efecto hover para miniaturas */
+    .thumbnail:hover {
+        transform: scale(1.1);
+    }
+</style>
+
+<!-- Scripts -->
 <script>
+    let imagenes = [];
+    let indiceActual = 0;
+
     document.addEventListener('DOMContentLoaded', function() {
-        // Código para el botón mostrar
-        const botonesMostrar = document.querySelectorAll('.btn-mostrar');
-        const detalleCliente = document.getElementById('detalle-cliente');
-    
-        botonesMostrar.forEach(boton => {
-            boton.addEventListener('click', function() {
-                const clienteId = this.getAttribute('data-id');
-    
-                fetch(`/clientes/${clienteId}/informacion/`, {
-                    headers: {
-                        'X-Requested-With': 'XMLHttpRequest'
-                    }
-                })
-                .then(response => response.text())
-                .then(html => {
-                    detalleCliente.innerHTML = html;
-                    detalleCliente.style.display = 'block';
-                    
-                    const btnCerrarCuadro = detalleCliente.querySelector('#btn-cerrar-cuadro');
-                    if (btnCerrarCuadro) {
-                        btnCerrarCuadro.addEventListener('click', function() {
-                            detalleCliente.style.display = 'none';
-                        });
-                    }
-                })
-                .catch(error => {
-                    console.error('Error al cargar la información:', error);
-                });
-            });
+        // Recolectar todas las imágenes de la tabla
+        const thumbnails = document.querySelectorAll('.thumbnail');
+        imagenes = Array.from(thumbnails).map(img => img.src);
+
+        // Evitar que el click en la imagen se propague al contenedor
+        document.querySelector('.imagen-contenedor').addEventListener('click', function(e) {
+            e.stopPropagation();
         });
-    
-        // Código para el buscador
-        const searchForm = document.getElementById('searchForm');
-        const searchInput = document.getElementById('searchInput');
-    
-        // Manejar el evento submit del formulario
-        searchForm.addEventListener('submit', function(e) {
-            e.preventDefault();
-            if (searchInput.value.trim() !== '') {
-                this.submit();
-            }
-        });
-    
-        // Manejar el evento keydown para la tecla Enter
-        searchInput.addEventListener('keydown', function(e) {
-            if (e.key === 'Enter') {
-                e.preventDefault();
-                if (this.value.trim() !== '') {
-                    searchForm.submit();
+
+        // Manejar teclas
+        document.addEventListener('keydown', function(e) {
+            if (document.getElementById('imagen-ampliada').style.display === 'flex') {
+                if (e.key === 'Escape') {
+                    cerrarImagen();
+                } else if (e.key === 'ArrowLeft') {
+                    navegarImagen(-1);
+                } else if (e.key === 'ArrowRight') {
+                    navegarImagen(1);
                 }
             }
         });
-    
-        // Manejar el evento input para limpiar la búsqueda
-        searchInput.addEventListener('input', function(e) {
-            if (this.value === '') {
-                window.location.href = "{% url 'clientes' %}";
-            }
-        });
     });
-    </script>
+
+    function mostrarImagen(src) {
+        const imagenAmpliada = document.getElementById('imagen-ampliada');
+        const imagenGrande = document.getElementById('imagen-grande');
+        
+        // Actualizar índice actual
+        indiceActual = imagenes.indexOf(src);
+
+        // Mostrar la imagen ampliada
+        imagenGrande.src = src;
+        imagenAmpliada.style.display = 'flex';
+
+        // Actualizar visibilidad de botones de navegación
+        actualizarControlesNavegacion();
+    }
+
+    function cerrarImagen(e) {
+        if (e) e.stopPropagation();
+        document.getElementById('imagen-ampliada').style.display = 'none';
+    }
+
+    function navegarImagen(direccion) {
+        indiceActual += direccion;
+
+        if (indiceActual >= 0 && indiceActual < imagenes.length) {
+            document.getElementById('imagen-grande').src = imagenes[indiceActual];
+            actualizarControlesNavegacion();
+        }
+    }
+
+    function actualizarControlesNavegacion() {
+        const btnPrev = document.querySelector('.btn-prev');
+        const btnNext = document.querySelector('.btn-next');
+
+        btnPrev.style.display = indiceActual > 0 ? 'block' : 'none';
+        btnNext.style.display = indiceActual < imagenes.length - 1 ? 'block' : 'none';
+    }
+</script>
+
 {% endblock %}

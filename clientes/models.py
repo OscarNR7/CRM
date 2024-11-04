@@ -1,6 +1,7 @@
 import logging
 from typing import Any
 from django.db import models
+from django.core.validators import MinValueValidator
 from datetime import timedelta,datetime
 
 logger = logging.getLogger('clientes')
@@ -15,12 +16,16 @@ class Vendedor(models.Model):
         return self.nombre
 
 class Cliente(models.Model):
+    OPCIONES_ESTADO = [
+        ('no_necesario', 'No necesario'),
+        ('necesario', 'Necesario'),
+        ('pendiente', 'Pendiente'),
+    ]
     #Definición de los campos para almacenar la información de los clientes
     id = models.AutoField(primary_key=True)
     nombre = models.CharField(max_length=255, help_text="Nombre del cliente")
     curp = models.CharField(max_length=100, unique=True,  help_text="Clave Única de Registro de Población (CURP)")
     nss = models.CharField(max_length=100, unique=True, help_text="Número de Seguridad Social (NSS)")
-    telefono = models.CharField(max_length=50, unique=True, null=True ,help_text="Numero de telefono del cliente")
     fecha_de_firma = models.DateField(null=True, blank=True, help_text="Fecha de Firma (DD/MM/YYYY)")
     fecha_de_baja = models.CharField(max_length=50, null=True, blank=True, help_text="Fecha de Baja")
     fecha_para_capturar_retiro = models.CharField(max_length=50, null=True, blank=True, help_text="Fecha para capturar retiro")
@@ -30,18 +35,23 @@ class Cliente(models.Model):
     rcv = models.CharField(max_length=50,null=True,blank=True,help_text="RCV")
     direccion = models.TextField(null=True, blank=True,help_text="Dirección completa del cliente")
     colonia = models.CharField(blank=True,max_length=255, help_text="Colonia de residencia del cliente")
+    cambio_de_afore = models.CharField(max_length=20,choices=OPCIONES_ESTADO,null=True, blank=True)
     fotografia = models.ImageField(upload_to='clientes/fotos/', null=True,blank=True,verbose_name="Foto", help_text="Fotografía del cliente")
+    foto_aval = models.ImageField(upload_to='clientes/fotos/', null= True,blank=True,verbose_name='Foto',help_text="Fotografia del Aval")
 
+    #obtener telefonos de los clientes
+    def get_telefonos_display(self):
+        return '/'.join([telefono.numero for telefono in self.telefonos.all()])
+    
     # Método para representar el cliente como una cadena 
     def __str__(self):
-        #fila= "Nombre" + self.nombre - "CURP" + self.curp - "NSS" + self.nss - "Colonia" + self.colonia
-        # return fila
         return f"{self.nombre}  - {self.curp} - {self.colonia}"
     
     def delete(self, *args, **kwargs):
         # Verificar si hay una fotografía antes de intentar eliminarla
-        if self.fotografia and self.fotografia.name:
+        if self.fotografia and self.fotografia.name and self.foto_aval and self.foto_aval.name:
             self.fotografia.delete()
+            self.foto_aval.delete()
         super().delete(*args, **kwargs)
     
     #funcion para calcular la fecha para el retiro
@@ -112,14 +122,21 @@ class Cliente(models.Model):
         verbose_name = 'Cliente'
         verbose_name_plural = 'Clientes'
 
+class Telefono(models.Model):
+    cliente = models.ForeignKey(Cliente, on_delete=models.CASCADE, related_name='telefonos')
+    numero = models.CharField(max_length=50,blank=True,null=True)
+
+    def __str__(self):
+        return f"{self.numero} - {self.cliente.nombre}"
+    
 class Pago(models.Model):
     cliente = models.ForeignKey(Cliente, on_delete=models.CASCADE, related_name='pagos')
     fecha_de_pago = models.DateField(null=True, blank=True)
-    F46dias = models.DateField(null=True, blank=True)
+    F46dias = models.CharField(max_length=50, null=True, blank=True)
     cancelacion = models.CharField(max_length=50,blank=True, null=True)
-    cantidad = models.DecimalField(max_digits=10, decimal_places=2)
+    cantidad = models.DecimalField(max_digits=10, decimal_places=2,blank=True, null=True,validators=[MinValueValidator(0.0)])
     porcentaje = models.DecimalField(max_digits=5, decimal_places=2)
-    anticipo = models.DecimalField(max_digits=10, decimal_places=2)
+    anticipo = models.DecimalField(max_digits=10, decimal_places=2,null=True,blank=True)
     observaciones = models.TextField(blank=True, null=True)
 
     def save(self, *args, **kwargs):

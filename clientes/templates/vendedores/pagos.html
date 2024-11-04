@@ -39,13 +39,11 @@
                 <h2>Vendedor: {{ vendedor_seleccionado.nombre }}</h2>
             </div>
             <div class="card-body bg-dark bordBLR">
-                {% for semana, datos in pagos_por_semana.items %}
+                {% for clave, datos in pagos_por_semana.items %}
                     {% if datos.clientes %}
-                       
-                        <h3><strong>SEMANA {{ semana }} DEL {{ datos.fecha_inicio|date:"d \d\e M"|upper }} AL {{ datos.fecha_fin|date:"d \d\e M"|upper }}</strong></h3>
-                        
+                        <h3 class="text-light"><strong>SEMANA {{ datos.semana }} DEL {{ datos.fecha_inicio|date:"d \d\e M"|upper }} AL {{ datos.fecha_fin|date:"d \d\e M"|upper }} del {{ datos.año }}</strong></h3>
                     {% else %}
-                        <h3>SEMANA {{ semana }} (sin clientes)</h3>
+                        <h3>SEMANA {{ datos.semana }} del {{ datos.año }} (sin clientes)</h3>
                     {% endif %}
                     <div class="table-responsive">
 
@@ -92,11 +90,13 @@
                             </tbody>
                         </table>
                     </div>
+                    <hr class="border border-light border-3 opacity-75">
                 {% endfor %}
             </div>
+            
         {% else %}
-            <div class="card-body text-bg-dark">
-                <p>Selecciona un vendedor para ver los clientes.</p>
+            <div class="card-body text-bg-dark text-center bordesC">
+                <p class="m-0">Selecciona un vendedor para ver los clientes.</p>
             </div>
         {% endif %}
     </div>

@@ -20,26 +20,28 @@
     </head>
 
     <body>
+
+
         <!-- Navigation Bar -->
-        <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <nav class="navbar navbar-expand-lg navbar-dark bg-dark pb-0 nav-noP">
             <div class="container-fluid">
                 <a class="navbar-brand nav-home" href="{% url 'home' %}">Kavajo</a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
                 <div class="collapse navbar-collapse" id="navbarNav">
-                    <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <ul class="navbar-nav me-auto mb-2 mb-lg-0 ">
                         {% if user.is_authenticated %}
-                            <li class="nav-item">
-                                <a class="nav-link" href="{% url 'clientes' %}">Clientes</a>
+                            <li class="nav-item  rounded-top-2 {% if 'clientes' in request.path %} bg-light text-dark {% endif %}">
+                                <a class="nav-link {% if 'clientes' in request.path %} text-black  {% endif %}" href="{% url 'clientes' %}">Clientes</a>
                             </li>
                             {% if user.userrole.role == 'gerente' %}
-                                <li class="nav-item">
-                                    <a class="nav-link" href="{% url 'administrar_usuarios' %}">Usuarios</a>
+                                <li class="nav-item rounded-top-2 {% if 'administrar' in request.path %} bg-light text-dark {% endif %}">
+                                    <a class="nav-link {% if 'administrar' in request.path %} text-dark {% endif %} " href="{% url 'administrar_usuarios' %}">Usuarios</a>
                                 </li>
                             {% endif %}
-                            <li class="nav-item">
-                                <a class="nav-link" href="{% url 'pagos' %}">Pagos</a>
+                            <li class="nav-item rounded-top-2 {% if 'pagos' in request.path %} bg-light text-dark {% endif %}">
+                                <a class="nav-link {% if 'pagos' in request.path %} text-dark {% endif %}" href="{% url 'pagos' %}">Pagos</a>
                             </li>
                         {% endif %}
                     </ul>
