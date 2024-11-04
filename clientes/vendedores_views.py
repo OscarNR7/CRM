@@ -1,4 +1,5 @@
 import logging
+from isoweek import Week
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -12,12 +13,12 @@ from django.template.loader import render_to_string
 from django.urls import reverse_lazy,reverse
 from django.views.generic import ListView,DeleteView
 from django.utils.decorators import method_decorator
-from datetime import datetime,timedelta
+from datetime import datetime,timedelta,date
 
 from .forms import *
 from .models import *
 from django.db.models import DateField
-from django.db.models.functions import Cast
+from django.db.models.functions import Cast, ExtractWeek
 from usuarios.decorators import gerente_required, administrador_required
 
 logger = logging.getLogger('clientes')
@@ -51,24 +52,40 @@ class ListarVendedores(LoginRequiredMixin,ListView):
     context_object_name = 'vendedores'
     paginate_by = 5
 
-def get_fechas_semana(numero_semana, año):
+
+
+def get_week_of_year(fecha):
     """
-    Calcula las fechas de inicio y fin de una semana específica.
+    Calcula el número correcto de semana para una fecha dada.
     """
-    # Crear una fecha para el primer día del año
-    primer_dia_año = datetime(año, 1, 1)
+    return int(fecha.strftime('%V'))
+
+def get_iso_calendar_data(fecha):
+    """
+    Retorna el año y número de semana ISO correctos para una fecha dada.
+    La semana 1 es la primera semana que contiene un jueves del nuevo año.
+    """
+    año_iso, semana_iso, _ = fecha.isocalendar()
+    return año_iso, semana_iso
+
+def get_fechas_semana(fecha):
+    """
+    Calcula las fechas de inicio y fin de la semana para una fecha específica,
+    considerando las reglas del calendario ISO.
+    """
+    # Obtener el día de la semana (1 = lunes, 7 = domingo)
+    año_iso, semana_iso = get_iso_calendar_data(fecha)
     
-    # Ajustar al primer día de la primera semana
-    while primer_dia_año.weekday() != 0:  # 0 es lunes
-        primer_dia_año += timedelta(days=1)
+    # Crear objeto Week de la librería isoweek
+    semana = Week(año_iso, semana_iso)
     
-    # Calcular el inicio de la semana deseada
-    inicio_semana = primer_dia_año + timedelta(weeks=numero_semana-1)
-    fin_semana = inicio_semana + timedelta(days=6)
+    # Obtener lunes y domingo de la semana
+    inicio_semana = semana.monday()
+    fin_semana = semana.sunday()
     
     return inicio_semana, fin_semana
 
-class PagosClientes(LoginRequiredMixin,ListView):
+class PagosClientes(LoginRequiredMixin, ListView):
     model = Cliente
     template_name = 'vendedores/pagos.html'
     context_object_name = 'pagos_por_semana'
@@ -79,36 +96,57 @@ class PagosClientes(LoginRequiredMixin,ListView):
             return {}
         try:
             if vendedor_id:
-                 if vendedor_id:
-                    clientes = Cliente.objects.filter(vendedor_id=vendedor_id).prefetch_related(
+                clientes = Cliente.objects.filter(vendedor_id=vendedor_id).prefetch_related(
                     Prefetch('pagos', queryset=Pago.objects.order_by('fecha_de_pago'))
-                ).annotate(
-                    fecha_de_firma_date=Cast('fecha_de_firma', DateField()),  # convierte a DateField
-                    semana=ExtractWeek('fecha_de_firma_date')  # usa el campo convertido para extraer la semana
-                ).order_by('semana', 'fecha_de_firma_date')
+                )
 
             pagos_por_semana = {}
-            año_actual = datetime.now().year
 
             for cliente in clientes:
-                semana = cliente.semana
-                if semana not in pagos_por_semana:
-                    fecha_inicio, fecha_fin = get_fechas_semana(semana, año_actual)
-                    pagos_por_semana[semana] = {
-                        'clientes': [],
-                        'fecha_inicio': fecha_inicio,
-                        'fecha_fin': fecha_fin
-                    }
-                pagos_por_semana[semana]['clientes'].append({
-                    'cliente': cliente,
-                    'pago': cliente.pagos.first()
-                })
-            return dict(sorted(pagos_por_semana.items()))
+                try:
+                    # Convertir la fecha de string a objeto date
+                    if isinstance(cliente.fecha_de_firma, str):
+                        fecha = datetime.strptime(cliente.fecha_de_firma, '%d-%b-%y').date()
+                    else:
+                        fecha = cliente.fecha_de_firma
+
+                    # Obtener el año y semana ISO
+                    año_iso, semana_iso = get_iso_calendar_data(fecha)
+                    
+                    # Calcular las fechas de inicio y fin de la semana
+                    inicio_semana, fin_semana = get_fechas_semana(fecha)
+
+                    # Si la semana incluye días de dos años diferentes,
+                    # usar el año correcto según las reglas ISO
+                    año_mostrar = año_iso
+
+                    # Crear clave única para cada semana
+                    clave = f"{año_iso}-{semana_iso}"
+
+                    if clave not in pagos_por_semana:
+                        pagos_por_semana[clave] = {
+                            'clientes': [],
+                            'fecha_inicio': inicio_semana,
+                            'fecha_fin': fin_semana,
+                            'semana': semana_iso,
+                            'año': año_mostrar
+                        }
+                    pagos_por_semana[clave]['clientes'].append({
+                        'cliente': cliente,
+                        'pago': cliente.pagos.first()
+                    })
+
+                except (ValueError, AttributeError) as e:
+                    logger.error(f"Error procesando fecha para cliente {cliente.id}: {e}")
+                    continue
+
+            # Ordenar por año y semana
+            return dict(sorted(pagos_por_semana.items(), key=lambda x: (x[1]['año'], x[1]['semana'])))
             
         except Exception as e:
             messages.error(self.request, "Ocurrió un error al obtener los pagos.")
-            logger.error(f"Error en PagosClientes.get_queryset: {e}")  # Registro del error
-            return {}  # Registro del error
+            logger.error(f"Error en PagosClientes.get_queryset: {e}")
+            return {}
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
