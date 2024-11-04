@@ -207,3 +207,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 MEDIA_ROOT = os.path.join(BASE_DIR, '')
 MEDIA_URL = '/clientes/fotos/'
+
+# Configuración de logs
+LOG_RETENTION_DAYS = 15  # o los días que prefieras
+LOG_ARCHIVE_DIR = os.path.join(BASE_DIR, 'log_archives')

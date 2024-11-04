@@ -12,3 +12,16 @@ class UserRole(models.Model):
 
     def __str__(self):
         return f"{self.user.username} - {self.get_role_display()}"
+
+class UserActivityLog(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    action = models.CharField(max_length=255)
+    target = models.CharField(max_length=255)
+    timestamp = models.DateTimeField(auto_now_add=True)
+    app_name = models.CharField(max_length=100)
+    
+    class Meta:
+        ordering = ['-timestamp']
+
+    def __str__(self):
+        return f"{self.user.username} - {self.action} - {self.timestamp}"

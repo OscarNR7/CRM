@@ -1,7 +1,9 @@
+# Importaciones de librerías estándar de Python
 import os
 import logging
 from datetime import datetime
 
+# Importaciones de Django
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -12,18 +14,18 @@ from django.db import IntegrityError
 from django.db.models import Q, Prefetch
 from django.db.models.functions import ExtractWeek
 from django.http import HttpResponse, JsonResponse
-from django.views.decorators.http import require_POST
-from django.shortcuts import render, redirect, get_object_or_404
+from django.shortcuts import render, redirect, get_object_or_404, HttpResponseRedirect
 from django.template.loader import render_to_string
-from django.urls import reverse_lazy,reverse
-from django.views.generic import TemplateView, ListView, UpdateView, DeleteView, CreateView, FormView
+from django.urls import reverse_lazy, reverse
 from django.utils.decorators import method_decorator
+from django.views.decorators.http import require_POST
+from django.views.generic import TemplateView, ListView, UpdateView, DeleteView, CreateView, FormView
 
-
+# Importaciones de la aplicación local
 from .forms import *
 from .models import *
 from usuarios.decorators import gerente_required, administrador_required
-from usuarios.models import UserRole
+from usuarios.views import log_user_activity
 
 logger = logging.getLogger('clientes')
 
@@ -79,8 +81,7 @@ class ListarClientes(LoginRequiredMixin,ListView):
         context['search_term'] = self.request.GET.get('search', '')
         context['orden'] = self.request.GET.get('orden', 'nombre')
         return context
-
-    
+   
 #funcion para agregar un nuevo cliente
 @login_required
 @administrador_required
@@ -93,6 +94,7 @@ def agregar_cliente(request):
             try:
                 # Guardar el cliente
                 cliente = formulario.save()
+
                 
                 # Guardar los teléfonos
                 for telefono_form in telefono_formset:
@@ -100,7 +102,13 @@ def agregar_cliente(request):
                         numero = telefono_form.cleaned_data.get('numero')
                         if numero and numero.strip():
                             Telefono.objects.create(cliente=cliente, numero=numero)
-                
+
+                log_user_activity(
+                    user=request.user,
+                    action="Agregó",
+                    target=f"cliente: {cliente.nombre}-{cliente.curp}",
+                    app_name="clientes"
+                )
                 messages.success(request, 'Cliente agregado exitosamente.')
                 if 'guardar_y_agregar' in request.POST:
                     return redirect('agregar')
@@ -155,6 +163,13 @@ def editar_cliente(request, id):
                                     numero=numero
                                 )
                                 telefonos_a_mantener.append(nuevo_telefono.pk)
+
+                log_user_activity(
+                    user=request.user,
+                    action="Editó",
+                    target=f"cliente: {cliente.nombre}-{cliente.curp}",
+                    app_name="clientes"
+                )
                 
                 # Eliminar teléfonos que no están en la lista a mantener
                 cliente.telefonos.exclude(pk__in=telefonos_a_mantener).delete()
@@ -192,6 +207,12 @@ class EliminarCliente(LoginRequiredMixin,DeleteView):
     def delete(self, request, *args, **kwargs):
         # Obtener el objeto cliente que se va a eliminar
         cliente = self.get_object()
+        log_user_activity(
+                user=self.request.user,
+                action="Eliminó",
+                target=f"cliente {cliente.nombre} {cliente.apellido}",
+                app_name="clientes"
+            )
         
         # Si el cliente tiene una imagen asociada, eliminarla del sistema de archivos
         if cliente.imagen:

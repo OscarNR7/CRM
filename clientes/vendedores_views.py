@@ -1,25 +1,31 @@
+# Importaciones estándar de Python
 import logging
+from datetime import datetime, timedelta, date
+
+# Librerías de terceros
 from isoweek import Week
+
+# Importaciones de Django
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.core.paginator import Paginator
-from django.db.models import Q, Prefetch
-from django.db.models.functions import ExtractWeek
-from django.http import HttpResponse
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.core.paginator import Paginator
+from django.db.models import Q, Prefetch, DateField
+from django.db.models.functions import Cast, ExtractWeek
+from django.http import HttpResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.template.loader import render_to_string
-from django.urls import reverse_lazy,reverse
-from django.views.generic import ListView,DeleteView
+from django.urls import reverse_lazy, reverse
 from django.utils.decorators import method_decorator
-from datetime import datetime,timedelta,date
+from django.views.generic import ListView, DeleteView
 
+# Importaciones de la aplicación local
 from .forms import *
 from .models import *
-from django.db.models import DateField
-from django.db.models.functions import Cast, ExtractWeek
 from usuarios.decorators import gerente_required, administrador_required
+from usuarios.views import log_user_activity
+
 
 logger = logging.getLogger('clientes')
 
@@ -34,13 +40,19 @@ def agregar_vendedor(request):
         if request.method == 'POST':
             vendedor_form = VendedorForm(request.POST)
             if vendedor_form.is_valid():
-                vendedor_form.save()
+                vendedor = vendedor_form.save()
+                log_user_activity(
+                    user=request.user,
+                    action="Agregó",
+                    target=f"Al vendedor: {vendedor.nombre}",
+                    app_name="vendedores"
+                )
                 return redirect('pagos')
+      
     except Exception as e:
         messages.error(request, "Error al agregar el vendedor.")
         logger.error(f"Error en agregar_vendedor: {e}")  # Registro del error
     return render(request, 'vendedores/pagos.html', {'vendedor_form': VendedorForm()})  
-
 
 class ListarVendedores(LoginRequiredMixin,ListView):
     '''
@@ -51,8 +63,6 @@ class ListarVendedores(LoginRequiredMixin,ListView):
     template_name = 'vendedores/pagos.html'
     context_object_name = 'vendedores'
     paginate_by = 5
-
-
 
 def get_week_of_year(fecha):
     """
@@ -178,7 +188,6 @@ class PagosClientes(LoginRequiredMixin, ListView):
 
         return super().get(request, *args, **kwargs)
 
-
 @login_required
 def agregar_editar_pago(request, cliente_id,vendedor_id):
     cliente = get_object_or_404(Cliente, id=cliente_id)
@@ -191,6 +200,14 @@ def agregar_editar_pago(request, cliente_id,vendedor_id):
             pago = form.save(commit=False)
             pago.cliente = cliente
             pago.save()
+
+            accion = "Editó o Agregó"
+            log_user_activity(
+                user=request.user,
+                action=accion,
+                target=f"El pago del cliente: {cliente.nombre}",
+                app_name="pagos"
+            )
             return redirect(reverse('pagos') + f'?vendedor={vendedor_id}')
     else:
         form = PagoForm(instance=pago)
@@ -203,13 +220,18 @@ def agregar_editar_pago(request, cliente_id,vendedor_id):
     }
     return render(request, 'vendedores/agregar_editar_pago.html', context)
 
-
 #eliminar vendedor + confirmacion para eliminar
 @login_required
 @administrador_required
 def eliminar_vendedor(request, vendedor_id):
     vendedor = get_object_or_404(Vendedor, id=vendedor_id)
     if request.method == 'POST':
+         log_user_activity(
+            user=request.user,
+            action="Eliminó",
+            target=f"vendedor: {vendedor.nombre}",
+            app_name="clientes"
+        )
          vendedor.delete()
          return redirect('pagos')  # Redirecciona solo después de la confirmación
     
