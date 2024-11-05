@@ -175,3 +175,7 @@ form input {
     font-size: 14px;
   }
 }
+
+.h-20{
+  height: 20% !important;
+}
