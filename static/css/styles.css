@@ -1,42 +1,41 @@
 /* Ocultar scrollbar */
 ::-webkit-scrollbar {
-    display: none;
+  display: none;
 }
 
 /* Estilo general */
 * {
-    margin: 0;
-    font-family: "Lexend Deca", sans-serif;
+  margin: 0;
+  font-family: "Lexend Deca", sans-serif;
 }
 
 /* Navbar personalizada */
 .navbar {
-    background-color: rgb(0, 0, 0) !important;
+  background-color: rgb(0, 0, 0) !important;
 }
 
 /* Estilo del enlace HOME más grande */
 .nav-home {
-    font-size: 24px; /* Cambia este valor para ajustar el tamaño */
-    font-weight: bold;
-    color: white !important;
+  font-size: 24px; /* Cambia este valor para ajustar el tamaño */
+  font-weight: bold;
+  color: white !important;
 }
 
 /* Estilo para los otros enlaces de la barra de navegación */
 .nav-link {
-    color: white 
+  color: white;
 }
 
 /* Espaciado entre los elementos de la barra de navegación */
 .navbar-nav .nav-item {
-    margin-left: 15px;
+  margin-left: 15px;
 }
 
 /* Cambiar el color del botón en estado hover */
 .nav-link:hover {
-    color: #ccc;
+  color: #ccc;
 }
 
-.nav-noP{
-    --bs-navbar-brand-padding-y: 0px !important; 
+.nav-noP {
+  --bs-navbar-brand-padding-y: 0px !important;
 }
-

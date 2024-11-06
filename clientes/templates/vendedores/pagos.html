@@ -41,9 +41,9 @@
             <div class="card-body bg-dark bordBLR">
                 {% for clave, datos in pagos_por_semana.items %}
                     {% if datos.clientes %}
-                        <h3 class="text-light"><strong>SEMANA {{ datos.semana }} DEL {{ datos.fecha_inicio|date:"d \d\e M"|upper }} AL {{ datos.fecha_fin|date:"d \d\e M"|upper }} del {{ datos.año }}</strong></h3>
+                        <h3 class="text-light">Semana {{ datos.semana }} : <br/> {{ datos.fecha_inicio|date:"d \d\e M"|upper }} AL {{ datos.fecha_fin|date:"d \d\e M"|upper }} DEL {{ datos.año }}</h3>
                     {% else %}
-                        <h3>SEMANA {{ datos.semana }} del {{ datos.año }} (sin clientes)</h3>
+                        <h3 class="text-light">Semana {{ datos.semana }} : del {{ datos.año }} (sin clientes)</h3>
                     {% endif %}
                     <div class="table-responsive">
 
