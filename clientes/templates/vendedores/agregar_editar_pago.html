@@ -5,7 +5,7 @@
 {% block titulo %}Agregar/Editar Pago{% endblock %}
 
 {% block content %}
-    <h1>Agregar/Editar Pago para {{ cliente.nombre }}</h1>
+    <h1>Agregar/Editar Pago {{ cliente.nombre }}</h1>
     
     <form method="post">
         {% csrf_token %}

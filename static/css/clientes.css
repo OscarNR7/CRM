@@ -47,3 +47,7 @@
 #btnBuscar p{
     margin: 0px;
 }
+
+.text-nowrap{
+    text-wrap: nowrap;
+}
