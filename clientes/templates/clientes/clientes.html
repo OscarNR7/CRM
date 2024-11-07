@@ -6,9 +6,6 @@ Clientes
 
 {% block content %}
 
-
-
-
 <div class="container-fluid">
     <div class="row">
         <h2 class="mb-4">Lista de Clientes</h2>
@@ -66,19 +63,8 @@ Clientes
                                     <th>Nombre</th>
                                     <th>CURP</th>
                                     <th>NSS</th>
-                                    <th>Teléfono</th>
-                                    <th>Fecha de Firma</th>
-                                    <th>Fecha de Baja</th>
-                                    <th>Fecha para Capturar Retiro</th>
-                                    <th>Observaciones</th>
-                                    <th>Alta</th>
+                                    <th>Tel</th>
                                     <th>Vendedor</th>
-                                    <th>RCV</th>
-                                    <th>Dirección</th>
-                                    <th>Colonia</th>
-                                    <th>Cambio de Afore</th>
-                                    <th>Fotografía</th>
-                                    <th>Aval</th>
                                     {% if user.is_authenticated and user.userrole.role == 'gerente' %}
                                         <th>Acciones</th>
                                     {% endif %}
@@ -92,21 +78,12 @@ Clientes
                                         <td>{{ cliente.curp }}</td>
                                         <td>{{ cliente.nss }}</td>
                                         <td>{{ cliente.get_telefonos_display|safe }}</td>
-                                        <td>{{ cliente.fecha_de_firma|date:"d/m/Y" }}</td>
-                                        <td>{{ cliente.fecha_de_baja }}</td>
-                                        <td>{{ cliente.fecha_para_capturar_retiro }}</td>
-                                        <td>{{ cliente.observaciones }}</td>
-                                        <td>{{ cliente.alta }}</td>
                                         <td>{{ cliente.vendedor }}</td>
-                                        <td>{{ cliente.rcv }}</td>
-                                        <td>{{ cliente.direccion }}</td>
-                                        <td>{{ cliente.colonia }}</td>
-
                                         <td class="{% if cliente.cambio_de_afore == 'pendiente' %}text-warning{% endif %}">
                                             {{ cliente.cambio_de_afore }}
                                         </td>
 
-                                        <td>
+                                        <!-- <td>
                                             {% if cliente.fotografia %}
                                                 <img src="{{ cliente.fotografia.url }}" height="50" class="thumbnail" onclick="mostrarImagen(this.src)">
                                             {% else %}
@@ -119,12 +96,15 @@ Clientes
                                             {% else %}
                                                 Sin aval
                                             {% endif %}
-                                        </td>
+                                        </td> -->
 
                                         {% if user.is_authenticated and user.userrole.role == 'gerente' %}
                                             <td class="align-middle">
                                                 <a class="btn btn-sm btncen btn-info" href="{% url 'editar' cliente.id %}">Editar</a>
                                                 <a class="btn btn-sm btncen btn-danger" href="{% url 'eliminar' cliente.id %}">Eliminar</a>
+                                                <button type="button" class="btn btn-primary btn-mostrar" data-id="{{ cliente.id }}">
+                                                    mostrar
+                                                </button>
                                             </td>   
                                         {% endif %}
                                     </tr>
@@ -269,69 +249,112 @@ Clientes
 
 <!-- Scripts -->
 <script>
-    let imagenes = [];
-    let indiceActual = 0;
-
     document.addEventListener('DOMContentLoaded', function() {
-        // Recolectar todas las imágenes de la tabla
-        const thumbnails = document.querySelectorAll('.thumbnail');
-        imagenes = Array.from(thumbnails).map(img => img.src);
+    // Referencias a elementos del DOM
+    const cuadroInfo = document.getElementById('detalle-cliente');
+    const botonesMostrar = document.querySelectorAll('.btn-mostrar');
+    let overlay = null;
 
-        // Evitar que el click en la imagen se propague al contenedor
-        document.querySelector('.imagen-contenedor').addEventListener('click', function(e) {
-            e.stopPropagation();
-        });
-
-        // Manejar teclas
-        document.addEventListener('keydown', function(e) {
-            if (document.getElementById('imagen-ampliada').style.display === 'flex') {
-                if (e.key === 'Escape') {
-                    cerrarImagen();
-                } else if (e.key === 'ArrowLeft') {
-                    navegarImagen(-1);
-                } else if (e.key === 'ArrowRight') {
-                    navegarImagen(1);
-                }
-            }
-        });
-    });
-
-    function mostrarImagen(src) {
-        const imagenAmpliada = document.getElementById('imagen-ampliada');
-        const imagenGrande = document.getElementById('imagen-grande');
-        
-        // Actualizar índice actual
-        indiceActual = imagenes.indexOf(src);
-
-        // Mostrar la imagen ampliada
-        imagenGrande.src = src;
-        imagenAmpliada.style.display = 'flex';
-
-        // Actualizar visibilidad de botones de navegación
-        actualizarControlesNavegacion();
+    // Crear y configurar el overlay
+    function initializeOverlay() {
+        overlay = document.createElement('div');
+        overlay.className = 'overlay';
+        overlay.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: transparent; // Sin color de fondo
+            display: none;
+            z-index: 1040;
+        `;
+        document.body.appendChild(overlay);
     }
 
-    function cerrarImagen(e) {
-        if (e) e.stopPropagation();
-        document.getElementById('imagen-ampliada').style.display = 'none';
-    }
-
-    function navegarImagen(direccion) {
-        indiceActual += direccion;
-
-        if (indiceActual >= 0 && indiceActual < imagenes.length) {
-            document.getElementById('imagen-grande').src = imagenes[indiceActual];
-            actualizarControlesNavegacion();
+    // Mostrar el cuadro de información y overlay
+    function mostrarCuadroInfo() {
+        if (cuadroInfo && overlay) {
+            cuadroInfo.style.display = 'block';
+            overlay.style.display = 'block';
         }
     }
 
-    function actualizarControlesNavegacion() {
-        const btnPrev = document.querySelector('.btn-prev');
-        const btnNext = document.querySelector('.btn-next');
-
-        btnPrev.style.display = indiceActual > 0 ? 'block' : 'none';
-        btnNext.style.display = indiceActual < imagenes.length - 1 ? 'block' : 'none';
+    // Cerrar el cuadro de información y overlay
+    function cerrarCuadroInfo() {
+        if (cuadroInfo && overlay) {
+            cuadroInfo.style.display = 'none';
+            overlay.style.display = 'none';
+        }
     }
+
+    // Cargar la información del cliente
+    function cargarInformacionCliente(clienteId) {
+        fetch(`/clientes/${clienteId}/informacion/`, {
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'Accept': 'text/html'
+            }
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Error en la respuesta del servidor');
+            }
+            return response.text();
+        })
+        .then(html => {
+            cuadroInfo.innerHTML = html;
+            mostrarCuadroInfo();
+        })
+        .catch(error => {
+            console.error('Error al cargar la información:', error);
+            alert('No se pudo cargar la información del cliente. Por favor, intente nuevamente.');
+        });
+    }
+
+    // Inicializar la funcionalidad
+    function initialize() {
+        initializeOverlay();
+
+        // Eventos para los botones mostrar
+        botonesMostrar.forEach(boton => {
+            boton.addEventListener('click', function(e) {
+                e.preventDefault();
+                const clienteId = this.getAttribute('data-id');
+                if (clienteId) {
+                    cargarInformacionCliente(clienteId);
+                }
+            });
+        });
+
+        // Evento para cerrar con el overlay
+        overlay.addEventListener('click', cerrarCuadroInfo);
+
+        // Evento para cerrar con ESC
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && cuadroInfo.style.display === 'block') {
+                cerrarCuadroInfo();
+            }
+        });
+
+        // Agregar botón de cerrar al cuadro de información si no existe
+        if (!document.getElementById('btn-cerrar-cuadro')) {
+            const btnCerrar = document.createElement('button');
+            btnCerrar.id = 'btn-cerrar-cuadro';
+            btnCerrar.className = 'btn-close';
+            btnCerrar.style.position = 'absolute';
+            btnCerrar.style.right = '10px';
+            btnCerrar.style.top = '10px';
+            cuadroInfo.style.position = 'relative';
+            cuadroInfo.appendChild(btnCerrar);
+            btnCerrar.addEventListener('click', cerrarCuadroInfo);
+        }
+    }
+
+    // Iniciar todo cuando el DOM esté listo
+    initialize();
+});
+    
 </script>
 
 {% endblock %}
