@@ -1,31 +1,98 @@
-<div class="card">
-    <div class="card-header d-flex justify-content-between">
-        <h3>{{ cliente.nombre }}</h3>
-        <button type="button" class="btn-close" id="btn-cerrar-cuadro" aria-label="Close"></button>
+<div class="card bg-dark text-light">
+    <div class="card-header d-flex justify-content-center align-items-center">
+        <h3 class="m-0">{{ cliente.nombre }}</h3>
     </div>
     <div class="card-body">
-        <div class="row">
-            <div class="col-md-4">
-                {% if cliente.fotografia %}
-                    <img src="{{ cliente.fotografia.url }}" class="img-thumbnail" alt="Foto de {{ cliente.nombre }}">
-                {% else %}
-                    <span class="text-muted">N/A</span>
-                {% endif %}
+        <div class="d-flex flex-column justify-content-center align-items-center">
+            <div class="col-md-4 d-flex flex-row justify-content-center px-2 text-center">
+                <div class="d-flex flex-column justify-content-center">
+                    {% if cliente.fotografia %}
+                        Fotografia
+                        <img src="{{ cliente.fotografia.url }}" class="imgclien" alt="Foto de {{ cliente.nombre }}">
+                    {% else %}
+                        <span class="text-muted">N/A</span>
+                    {% endif %}
+                </div>
+                <div class="d-flex flex-column justify-content-center">
+                    {% if cliente.foto_aval %}
+                        Aval
+                        <img src="{{ cliente.foto_aval.url }}" class="imgclien" alt="Aval de {{ cliente.nombre }}">
+                    {% else %}
+                        <span class="text-muted">N/A</span>
+                    {% endif %}
+                </div>
             </div>
-            <div class="col-md-8">
-                <p><strong>Nombre</strong> {{ cliente.nombre }}</p>
-                <p><strong>CURP:</strong> {{ cliente.curp }}</p>
-                <p><strong>NSS:</strong> {{ cliente.nss }}</p>
-                <p><strong>Teléfono:</strong> {{ cliente.telefono }}</p>
-                <p><strong>Fecha de firma:</strong> {{ cliente.fecha_de_firma}}</p>
-                <p><strong>Fecha de baja:</strong> {{ cliente.fecha_de_baja}}</p>
-                <p><strong>Fecha para capturar retiro:</strong> {{ cliente.fecha_para_capturar_retiro}}</p>
-                <p><strong>Observaciones:</strong> {{ cliente.observaciones }}</p>
-                <p><strong>Alta:</strong> {{ cliente.alta }}</p>
-                <p><strong>Vendedor:</strong> {{ cliente.vendedor }}</p>
-                <p><strong>RCV:</strong> {{ cliente.rcv }}</p>
-                <p><strong>Dirección:</strong> {{ cliente.direccion }}</p>
-                <p><strong>Colonia:</strong> {{ cliente.colonia }}</p>
+            <div class="col-md-8 p-2 w-100 table-responsive">
+                
+                <table class="table table-dark table-striped ">
+                    <thead>
+                        <tr>
+                            <th>Id</th>
+                            <th>Nombre</th>
+                            <th>Curp</th>
+                        </tr>
+                    </thead>
+                    <tbody class="table-group-divider" >
+                        <tr>
+                            <td>{{ cliente.id }}</td>       
+                            <td>{{ cliente.nombre }}</td>       
+                            <td>{{ cliente.curp }}</td>       
+                        </tr>
+                    </tbody>
+                    <thead>
+                        <tr>
+                            <th>NSS</th>
+                            <th>Telefonos</th>
+                            <th>Vendedor</th>
+                        </tr>
+                    </thead>
+                    <tbody class="table-group-divider" >
+                        <tr>
+                            <td>{{ cliente.nss }}</td>       
+                            <td>{{ cliente.get_telefonos_display|safe }}</td>              
+                            <td>{{ cliente.vendedor }}</td>       
+                        </tr>
+                    </tbody>
+                    <thead>
+                        <tr>
+                            <th>Fecha de firma</th>
+                            <th>Fecha de baja</th>
+                            <th>Fecha de retiro</th>
+                        </tr>
+                    </thead>
+                    <tbody class="table-group-divider" >
+                        <tr>
+                            <td>{{ cliente.fecha_de_firma }}</td>       
+                            <td>{{ cliente.fecha_de_baja }}</td>       
+                            <td>{{ cliente.fecha_para_capturar_retiro }}</td>       
+                        </tr>
+                    </tbody>
+                    <thead>
+                        <tr>
+                            <th>RCV</th>
+                            <th>Dirección</th>
+                            <th>Colonia</th>
+                        </tr>
+                    </thead>
+                    <tbody class="table-group-divider" >
+                        <tr>
+                            <td>{{ cliente.rcv }}</td>       
+                            <td>{{ cliente.direccion }}</td>
+                            <td>{{ cliente.colonia }}</td>
+                        </tr>
+                    </tbody>
+                    <thead>
+                        <tr>
+                            <th>Observaciones</th>
+                        </tr>
+                    </thead>
+                    <tbody class="table-group-divider" >
+                        <tr>
+                            <td colspan="3">{{ cliente.observaciones }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+                
             </div>
         </div>
     </div>
