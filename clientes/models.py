@@ -55,7 +55,8 @@ class Cliente(models.Model):
     )
     #obtener telefonos de los clientes
     def get_telefonos_display(self):
-        return '/'.join([telefono.numero for telefono in self.telefonos.all()])
+        '''Retorna los telefonos separados por /'''
+        return "<ul class='m-0'>" + "".join([f"<li>{telefono.numero}</li>" for telefono in self.telefonos.all()]) + "</ul>"
     
     # Método para representar el cliente como una cadena 
     def __str__(self):

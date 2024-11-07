@@ -3,26 +3,31 @@
 {% block titulo %}Iniciar Sesión{% endblock %}
 
 {% block content %}
-    <div class="logH">
-        <h3 id="IniciarS" class="text-center">Iniciar Sesión</h3>
-    </div>
-    <div class="logAva">
-        <img src="{% static 'img/avatar.svg' %}" alt="" id="imgUser">
-    </div>
-    <div class="logF">
-        <form method="post">
-            {% csrf_token %}
-            {% if messages %}
-                <div class="alert alert-danger" role="alert">
-                    {% for message in messages %}
-                        {{ message }}
-                    {% endfor %}
+
+    <div class="container-fluid d-flex flex-column h-100">
+        <div class="container-fluid d-flex flex-column align-items-center p-4 h-auto">
+            <h3 id="IniciarS" class="text-center fs-1 m-0">Iniciar Sesión</h3>
+        </div>
+        <div class="container-fluid d-flex flex-column align-items-center h-auto">
+            <i class="fa-regular fa-circle-user fa-10x text-black"></i>
+        </div>
+        <div class="container-fluid h-50 d-flex align-items-center">
+            <form method="post" class="container-fluid d-flex flex-column logF">
+                {% csrf_token %}
+                {% if messages %}
+                    <div class="alert alert-danger" role="alert">
+                        {% for message in messages %}
+                            {{ message }}
+                        {% endfor %}
+                    </div>
+                {% endif %} 
+                {{ form.as_p }}
+                <div class="botonSum">
+                    <button type="submit" class="btnIni">Iniciar Sesión</button>
                 </div>
-            {% endif %} 
-            {{ form.as_p }}
-            <div class="botonSum">
-                <button type="submit" class="btnIni">Iniciar Sesión</button>
-            </div>
-        </form>
+            </form>
+        </div>
     </div>
+
+
 {% endblock %}

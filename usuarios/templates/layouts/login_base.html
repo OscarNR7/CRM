@@ -26,6 +26,11 @@
       rel="stylesheet"
     />
 
+    <!-- fontawesomefree -->
+    <link href="{% static 'fontawesomefree/css/fontawesome.css' %}" rel="stylesheet" type="text/css">
+    <link href="{% static 'fontawesomefree/css/brands.css' %}" rel="stylesheet" type="text/css">
+    <link href="{% static 'fontawesomefree/css/solid.css' %}" rel="stylesheet" type="text/css">
+
     <link rel="stylesheet" href="{% static 'css/login.css' %}" />
 
     {% block extra_css %}{% endblock %}
@@ -33,11 +38,11 @@
 
   <body>
     <div class="container">
-      <div class="center-div">
-        <div class="loginLogo">
+      <div class="center-div rounded-4">
+        <div class="container-fluid bg-black rounded-start-4 displayLogo justify-content-center align-items-center">
           <h1>Kavajo</h1>
         </div>
-        <div class="loginForm">
+        <div class="container-fluid text-dark">
             {% block content %}{% endblock %}
         </div>
       </div>

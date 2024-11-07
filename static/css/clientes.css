@@ -47,3 +47,120 @@
 #btnBuscar p{
     margin: 0px;
 }
+
+.text-nowrap{
+    text-wrap: nowrap;
+}
+
+/* Estilo para el modal de imagen ampliada */
+.imagen-ampliada {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.9);
+    z-index: 1000;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Contenedor de la imagen ampliada */
+.imagen-contenedor {
+    position: relative;
+    max-width: 90%;
+    max-height: 90%;
+}
+
+/* Imagen dentro del contenedor */
+.imagen-contenedor img {
+    max-width: 100%;
+    max-height: 90vh;
+    object-fit: contain;
+    border-radius: 4px;
+    box-shadow: 0 0 20px rgba(0,0,0,0.3);
+}
+
+/* Botón de cierre */
+.btn-cerrar {
+    position: absolute;
+    right: -40px;
+    top: -40px;
+    background: none;
+    border: none;
+    color: white;
+    font-size: 30px;
+    cursor: pointer;
+    padding: 10px;
+    z-index: 1001;
+}
+
+/* Botones de navegación */
+.btn-navegacion {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(255, 255, 255, 0.1);
+    border: none;
+    color: white;
+    padding: 15px;
+    cursor: pointer;
+    font-size: 24px;
+    border-radius: 50%;
+    transition: background-color 0.3s;
+}
+
+/* Hover en botones de navegación */
+.btn-navegacion:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+/* Posicionamiento de botones de navegación */
+.btn-prev {
+    left: -60px;
+}
+
+.btn-next {
+    right: -60px;
+}
+
+/* Estilo para miniaturas */
+.thumbnail {
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+/* Efecto hover para miniaturas */
+.thumbnail:hover {
+    transform: scale(1.1);
+}
+
+#contPrin {
+  display: flex !important;
+}
+
+#detalle-cliente {
+    width: 40%;
+}
+
+.imgclien{
+    height: 220px;
+    border-radius: 15px;
+    border: 2px solid white;
+    margin: 5px;
+}
+
+@media (max-width: 1000px) {
+    #contPrin {
+      display: block !important;
+    }
+
+    #detalle-cliente {
+        width: 100%;
+    }
+
+    .imgclien{
+        height: 300px;
+    }
+}

@@ -31,7 +31,7 @@
                 </div>
             {% endfor %}
         </div>
-        <button type="button" class="btn btn-outline-secondary btn-sm mt-2" id="add-telefono">
+        <button type="button" class="btn btn-outline-light btn-sm mt-2" id="add-telefono">
             <i class="fas fa-plus"></i> Agregar otro teléfono
         </button>
     </div>
@@ -55,133 +55,137 @@
     {% endfor %}
 
     <input class="btn btn-success" type="submit" value="Enviar Datos">
+
     {% if modo == 'agregar' %}
         <input class="btn btn-success" type="submit" name="guardar_y_agregar" value="Guardar y agregar otro">
     {% endif %}
+
     <a class="btn btn-primary" href="{% url 'clientes' %}" role="button">Cancelar</a>
+
 </form>
 
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    const formset = document.getElementById('telefono-formset');
-    const addButton = document.getElementById('add-telefono');
-    const totalFormsInput = document.getElementById('id_telefonos-TOTAL_FORMS');
-    
-    // Función para crear el template de un nuevo formulario
-    function createEmptyFormTemplate() {
-        const newIndex = parseInt(totalFormsInput.value);
-        const template = `
-            <div class="telefono-form d-flex align-items-center mb-2">
-                <input type="hidden" name="telefonos-${newIndex}-id" id="id_telefonos-${newIndex}-id">
-                <input type="text" name="telefonos-${newIndex}-numero" id="id_telefonos-${newIndex}-numero"
-                       class="form-control" placeholder="Ingrese número telefónico">
-                <button type="button" class="btn btn-danger btn-sm delete-telefono ms-2">
-                    <i class="fas fa-trash"></i>
-                </button>
-                <div class="text-danger"></div>
-            </div>
-        `;
-        return template;
-    }
 
-    // Función para actualizar los índices del formset
-    function updateFormIndices() {
-        const forms = formset.getElementsByClassName('telefono-form');
-        let visibleIndex = 0;
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const formset = document.getElementById('telefono-formset');
+        const addButton = document.getElementById('add-telefono');
+        const totalFormsInput = document.getElementById('id_telefonos-TOTAL_FORMS');
         
-        for (let i = 0; i < forms.length; i++) {
-            const form = forms[i];
-            const inputs = form.getElementsByTagName('input');
-            for (let input of inputs) {
-                const newName = input.name.replace(/-\d+-/, `-${visibleIndex}-`);
-                const newId = input.id.replace(/-\d+-/, `-${visibleIndex}-`);
-                input.name = newName;
-                input.id = newId;
-            }
-            visibleIndex++;
+        // Función para crear el template de un nuevo formulario
+        function createEmptyFormTemplate() {
+            const newIndex = parseInt(totalFormsInput.value);
+            const template = `
+                <div class="telefono-form d-flex align-items-center mb-2">
+                    <input type="hidden" name="telefonos-${newIndex}-id" id="id_telefonos-${newIndex}-id">
+                    <input type="text" name="telefonos-${newIndex}-numero" id="id_telefonos-${newIndex}-numero"
+                        class="form-control" placeholder="Ingrese número telefónico">
+                    <button type="button" class="btn btn-danger btn-sm delete-telefono ms-2">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                    <div class="text-danger"></div>
+                </div>
+            `;
+            return template;
         }
-        totalFormsInput.value = visibleIndex;
-    }
-    
-    // Función para manejar la eliminación de teléfonos
-    function handleDelete(event) {
-        const form = event.target.closest('.telefono-form');
-        const idInput = form.querySelector('input[name*="-id"]');
-        const telefono_id = idInput ? idInput.value : '';
-        
-        if (telefono_id && telefono_id !== '') {
-            if (confirm('¿Está seguro de eliminar este teléfono?')) {
-                const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
-                
-                fetch(`/telefono/eliminar/${telefono_id}/`, {
-                    method: 'POST',
-                    headers: {
-                        'X-CSRFToken': csrfToken,
-                        'Content-Type': 'application/json'
-                    }
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.status === 'success') {
-                        form.remove();
-                        updateFormIndices();
-                        showAlert('success', 'Teléfono eliminado correctamente');
-                    } else {
-                        throw new Error(data.message || 'Error al eliminar el teléfono');
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    showAlert('danger', 'Error al eliminar el teléfono: ' + error.message);
-                });
+
+        // Función para actualizar los índices del formset
+        function updateFormIndices() {
+            const forms = formset.getElementsByClassName('telefono-form');
+            let visibleIndex = 0;
+            
+            for (let i = 0; i < forms.length; i++) {
+                const form = forms[i];
+                const inputs = form.getElementsByTagName('input');
+                for (let input of inputs) {
+                    const newName = input.name.replace(/-\d+-/, `-${visibleIndex}-`);
+                    const newId = input.id.replace(/-\d+-/, `-${visibleIndex}-`);
+                    input.name = newName;
+                    input.id = newId;
+                }
+                visibleIndex++;
             }
-        } else {
-            // Para campos vacíos o nuevos teléfonos no guardados
-            form.remove();
+            totalFormsInput.value = visibleIndex;
+        }
+        
+        // Función para manejar la eliminación de teléfonos
+        function handleDelete(event) {
+            const form = event.target.closest('.telefono-form');
+            const idInput = form.querySelector('input[name*="-id"]');
+            const telefono_id = idInput ? idInput.value : '';
+            
+            if (telefono_id && telefono_id !== '') {
+                if (confirm('¿Está seguro de eliminar este teléfono?')) {
+                    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+                    
+                    fetch(`/telefono/eliminar/${telefono_id}/`, {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRFToken': csrfToken,
+                            'Content-Type': 'application/json'
+                        }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.status === 'success') {
+                            form.remove();
+                            updateFormIndices();
+                            showAlert('success', 'Teléfono eliminado correctamente');
+                        } else {
+                            throw new Error(data.message || 'Error al eliminar el teléfono');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        showAlert('danger', 'Error al eliminar el teléfono: ' + error.message);
+                    });
+                }
+            } else {
+                // Para campos vacíos o nuevos teléfonos no guardados
+                form.remove();
+                updateFormIndices();
+            }
+        }
+        
+        // Función para agregar nuevo teléfono
+        function addNewPhoneForm() {
+            // Insertar el nuevo formulario
+            const template = createEmptyFormTemplate();
+            formset.insertAdjacentHTML('beforeend', template);
+            
+            // Agregar el listener al nuevo botón de eliminar
+            const newForm = formset.lastElementChild;
+            const deleteBtn = newForm.querySelector('.delete-telefono');
+            if (deleteBtn) {
+                deleteBtn.addEventListener('click', handleDelete);
+            }
+            
+            // Actualizar el contador de formularios
             updateFormIndices();
         }
-    }
-    
-    // Función para agregar nuevo teléfono
-    function addNewPhoneForm() {
-        // Insertar el nuevo formulario
-        const template = createEmptyFormTemplate();
-        formset.insertAdjacentHTML('beforeend', template);
         
-        // Agregar el listener al nuevo botón de eliminar
-        const newForm = formset.lastElementChild;
-        const deleteBtn = newForm.querySelector('.delete-telefono');
-        if (deleteBtn) {
-            deleteBtn.addEventListener('click', handleDelete);
+        // Función para mostrar alertas
+        function showAlert(type, message) {
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
+            alertDiv.innerHTML = `
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            `;
+            formset.parentNode.insertBefore(alertDiv, formset);
+            setTimeout(() => alertDiv.remove(), 3000);
         }
         
-        // Actualizar el contador de formularios
-        updateFormIndices();
-    }
-    
-    // Función para mostrar alertas
-    function showAlert(type, message) {
-        const alertDiv = document.createElement('div');
-        alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
-        alertDiv.innerHTML = `
-            ${message}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        `;
-        formset.parentNode.insertBefore(alertDiv, formset);
-        setTimeout(() => alertDiv.remove(), 3000);
-    }
-    
-    // Agregar event listeners
-    if (addButton) {
-        addButton.addEventListener('click', addNewPhoneForm);
-    }
-    
-    // Agregar listeners a botones de eliminar existentes
-    document.querySelectorAll('.delete-telefono').forEach(btn => {
-        btn.addEventListener('click', handleDelete);
+        // Agregar event listeners
+        if (addButton) {
+            addButton.addEventListener('click', addNewPhoneForm);
+        }
+        
+        // Agregar listeners a botones de eliminar existentes
+        document.querySelectorAll('.delete-telefono').forEach(btn => {
+            btn.addEventListener('click', handleDelete);
+        });
+        
+        // Agregar validación al envío del formulario
+        document.querySelector('form').addEventListener('submit', validateForm);
     });
-    
-    // Agregar validación al envío del formulario
-    document.querySelector('form').addEventListener('submit', validateForm);
-});
 </script>
