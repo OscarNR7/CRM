@@ -3,12 +3,20 @@
 {% block titulo %} Editar {% endblock %}
 
 {% block content %}
-<div class="card bg-dark text-light">
-    <div class="card-header fs-2">Editar un cliente</div>
-    <div class="card-body">
-        <h4 class="card-title">Datos del cliente</h4>
-        {% include 'clientes/form.html' %}
+
+<div class="d-flex justify-content-center w-100">
+    <div class="card bg-dark text-light widthRF mb-3">
+        <div class="card-header fs-2">
+            Editar un cliente
+        </div>
+            <div class="card-body">
+                <h4 class="card-title">Datos del cliente</h4>
+                {% include 'clientes/form.html' %}
+            </div>
+        </div>
     </div>
 </div>
+
+
 
 {% endblock %}
