@@ -164,3 +164,16 @@
         height: 300px;
     }
 }
+
+/* Diseño responsivo clientes*/
+
+.widthRF {
+    width: 70% !important;
+  }
+  
+  @media (max-width: 800px) {
+    .widthRF {
+      width: 100% !important;
+    }
+  }
+  

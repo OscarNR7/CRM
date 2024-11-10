@@ -5,13 +5,21 @@
 {% block titulo %}Agregar/Editar Pago{% endblock %}
 
 {% block content %}
-    <h1>Agregar/Editar Pago {{ cliente.nombre }}</h1>
-    
-    <form method="post">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit" class="btn btn-primary">Guardar</button>
-        <a class="btn btn-primary" href="{% url 'pagos' %}?vendedor={{ vendedor_id|default:'' }}" role="button">Cancelar</a>
-    </form>
-    
+
+<div class="d-flex justify-content-center w-100">
+    <div class="card bg-dark text-light widthRF mb-3">
+        <div class="card-header">
+            <h2>Agregar/Editar Pago</h2>
+            <h3>{{ cliente.nombre }}</h3>
+        </div>
+        <div class="card-body">
+            <form method="post">
+                {% csrf_token %}
+                {{ form.as_p }}
+                <button type="submit" class="btn btn-primary">Guardar</button>
+                <a class="btn btn-primary" href="{% url 'pagos' %}?vendedor={{ vendedor_id|default:'' }}" role="button">Cancelar</a>
+            </form>
+        </div>
+    </div>
+</div>    
 {% endblock %}
