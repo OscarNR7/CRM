@@ -4,7 +4,7 @@
         <tr>
             <th>ID</th>
             <th>Nombre</th>
-            {% if user.is_authenticated and user.userrole.role == 'gerente' or user.userrole.role == 'administrador' %}
+            {% if user.is_authenticated and user.userrole.role == 'gerente' %}
                 <th>Acciones</th>
             {% endif %}
         </tr>
@@ -14,37 +14,49 @@
             <tr>
                 <td>{{ vendedor.id }}</td>
                 <td>{{ vendedor.nombre }}</td>
-                <td>
-                    {% if user.is_authenticated and user.userrole.role == 'gerente' or user.userrole.role == 'administrador' %}
+                {% if user.is_authenticated and user.userrole.role == 'gerente' %}
+                    <td>
                         <form action="{% url 'eliminar_vendedor' vendedor.id %}" method="post" style="display: inline;">
                             {% csrf_token %}
                             <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('¿Estás seguro de que deseas eliminar a este vendedor?');">Eliminar</button>
-                        </form>
-                    {% endif %}
-                </td>
+                        </form> 
+                    </td>
+                {% endif %}
             </tr>
         {% endfor %}
     </tbody>
 </table>
 
 <!-- Enlaces de paginación -->
-<div class="pagination">
-    <span class="step-links">
+{% if vendedores_paginados.paginator.num_pages > 1 %}
+<nav aria-label="Navegación de páginas" class="mt-4">
+    <ul class="pagination justify-content-center">
         {% if vendedores_paginados.has_previous %}
-            <a href="#" class="vendedor-page-link" data-page="1">&laquo; Primera</a>
-            <a href="#" class="vendedor-page-link" data-page="{{ vendedores_paginados.previous_page_number }}">Anterior</a>
+            <!-- <li class="page-item">
+                <a href="#" class="page-link text-dark vendedor-page-link" data-page="1">&laquo; Primera</a>
+            </li> -->
+            <li class="page-item">
+                <a href="#" class="page-link text-dark vendedor-page-link" data-page="{{ vendedores_paginados.previous_page_number }}">Anterior</a>
+            </li>
         {% endif %}
 
-        <span class="current">
-            Página {{ vendedores_paginados.number }} de {{ vendedores_paginados.paginator.num_pages }}.
-        </span>
+        <li class="page-item active">
+            <span class="page-link bg-dark border-dark">
+                Página {{ vendedores_paginados.number }} de {{ vendedores_paginados.paginator.num_pages }}
+            </span>
+        </li>
 
         {% if vendedores_paginados.has_next %}
-            <a href="#" class="vendedor-page-link" data-page="{{ vendedores_paginados.next_page_number }}">Siguiente</a>
-            <a href="#" class="vendedor-page-link" data-page="{{ vendedores_paginados.paginator.num_pages }}">Última &raquo;</a>
+            <li class="page-item">
+                <a href="#" class="page-link text-dark vendedor-page-link" data-page="{{ vendedores_paginados.next_page_number }}">Siguiente</a>
+            </li>
+            <!-- <li class="page-item">
+                <a href="#" class="page-link text-dark vendedor-page-link" data-page="{{ vendedores_paginados.paginator.num_pages }}">Última &raquo;</a>
+            </li> -->
         {% endif %}
-    </span>
-</div>
+    </ul>
+</nav>
+{% endif %}
 
 <!-- Formulario para agregar vendedor si el usuario es gerente o administrador -->
 {% if user.is_authenticated and user.userrole.role == 'gerente' or user.userrole.role == 'administrador' %}

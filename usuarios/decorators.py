@@ -10,9 +10,9 @@ def gerente_required(view_func):
                 if request.user.userrole.role == 'gerente':
                     return view_func(request, *args, **kwargs)
             except UserRole.DoesNotExist:
-                # Si el usuario no tiene un rol asignado, lo redirigimos a 'home'
-                return redirect('home')
-        return redirect('home')
+                # Si el usuario no tiene un rol asignado, lo redirigimos a 'clientes'
+                return redirect('clientes')
+        return redirect('clientes')
     return _wrapped_view
 
 def administrador_required(view_func):
@@ -23,6 +23,6 @@ def administrador_required(view_func):
                 if request.user.userrole.role in ['gerente', 'administrador']:
                     return view_func(request, *args, **kwargs)
             except UserRole.DoesNotExist:
-                return redirect('home')
-        return redirect('home')
+                return redirect('clientes')
+        return redirect('clientes')
     return _wrapped_view

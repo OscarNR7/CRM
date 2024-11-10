@@ -142,7 +142,7 @@ def signout(request):
         Args: request (HttpRequest): peticion HTTP
     '''
     logout(request)
-    return redirect('home')
+    return redirect('clientes')
 
 #funcion para iniciar seseion en el sistema
 def signin(request):
@@ -163,18 +163,8 @@ def signin(request):
         return render(request, 'login/signin.html', {'form': AuthenticationForm()})
     else:
         login(request, user)
-        return redirect('home')
+        return redirect('clientes')
     
-@login_required
-def profile(request):
-    try:
-        usuario = request.user
-    except Exception as e:
-        messages.error(request, f"Error al cargar el perfil: {e}")
-        return redirect('home')
-    
-    return render(request, 'usuarios/profile.html', {'usuario': usuario})
-
 def log_user_activity(user, action, target, app_name):
     try:
         UserActivityLog.objects.create(
@@ -187,8 +177,9 @@ def log_user_activity(user, action, target, app_name):
     except Exception as e:
         print(f"Error al crear log: {str(e)}")  # Para debugging
 
+#-------------------------------------------------------User Avtivity----------------------------------------------------------
 @login_required
-@administrador_required
+@gerente_required
 def activity_log(request):
     try:
         # Obtener logs filtrados
@@ -208,7 +199,8 @@ def activity_log(request):
         print(f"Error en la vista activity_log: {e}")
         messages.error(request, "Error al cargar el historial de actividades.")
         return render(request, 'usuarios/listar_usuarios.html', {'logs': []})
-    
+
+@gerente_required
 def clean_logs_view(request):
     # Establece los días de retención
     retention_days = 15  # o el número que prefieras
