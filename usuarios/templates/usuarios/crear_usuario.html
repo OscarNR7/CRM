@@ -1,12 +1,22 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<h2>Crear Nuevo Usuario</h2>
-<form method="post">
-    {% csrf_token %}
-    {{ user_form.as_p }}
-    {{ role_form.as_p }}
-    <button type="submit" class="btn btn-success">Crear Usuario</button>
-    <a class="btn btn-primary" href="{% url 'administrar_usuarios' %}" role="button">Cancelar</a>
-</form>
+
+<div class="d-flex justify-content-center w-100">
+    <div class="card bg-dark text-light widthRF mb-3">
+        <div class="card-header">
+            <h2>Crear Nuevo Usuario</h2>
+        </div>
+        <div class="card-body">
+            <form method="post">
+                {% csrf_token %}
+                {{ user_form.as_p }}
+                {{ role_form.as_p }}
+                <button type="submit" class="btn btn-success">Crear Usuario</button>
+                <a class="btn btn-primary" href="{% url 'administrar_usuarios' %}" role="button">Cancelar</a>
+            </form>   
+        </div>
+    </div>
+</div>
+
 {% endblock %}
