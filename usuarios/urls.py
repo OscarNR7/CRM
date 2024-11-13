@@ -10,7 +10,6 @@ urlpatterns = [
     path('eliminar/<int:pk>/', EliminarUsuario.as_view(), name='eliminar_usuario'),
     path('logout/', views.signout, name = 'logout'),
     path('', views.signin, name = 'signin'),
-    path('profile/', views.profile, name = 'perfil'),
     path('actividad/', views.activity_log, name='activity_log'),
     path('clean-logs/', clean_logs_view, name='clean_logs'),
 ]

@@ -30,14 +30,6 @@ from usuarios.views import log_user_activity
 logger = logging.getLogger('clientes')
 
 # Create your views here.
-#Renderiza la pagina de inicio
-class Home(LoginRequiredMixin,TemplateView):
-    '''
-    Renderiza la pagina de inicio con los detalles de la empresa
-     Args: request (HttpRequest): peticion HTTP
-    '''
-    template_name = 'home.html'
-
 #Calse que muestra la pagina de la lista de clientes y aplicar las busqueda de los clientes
 class ListarClientes(LoginRequiredMixin,ListView):
     '''
@@ -128,7 +120,7 @@ def agregar_cliente(request):
     })
 
 @login_required
-@administrador_required
+@gerente_required
 def editar_cliente(request, id):
     cliente = get_object_or_404(Cliente, id=id)
     
@@ -195,7 +187,7 @@ def editar_cliente(request, id):
     })
 
 #funcion para eliminar un cliente existente 
-@method_decorator([administrador_required], name='dispatch')
+@method_decorator([gerente_required], name='dispatch')
 class EliminarCliente(LoginRequiredMixin,DeleteView):
     '''
     Elimina un cliente existente en la base de datos

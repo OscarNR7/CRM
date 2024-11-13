@@ -189,6 +189,7 @@ class PagosClientes(LoginRequiredMixin, ListView):
         return super().get(request, *args, **kwargs)
 
 @login_required
+@gerente_required
 def agregar_editar_pago(request, cliente_id,vendedor_id):
     cliente = get_object_or_404(Cliente, id=cliente_id)
     vendedor = get_object_or_404(Vendedor, id=vendedor_id)
@@ -222,7 +223,7 @@ def agregar_editar_pago(request, cliente_id,vendedor_id):
 
 #eliminar vendedor + confirmacion para eliminar
 @login_required
-@administrador_required
+@gerente_required
 def eliminar_vendedor(request, vendedor_id):
     vendedor = get_object_or_404(Vendedor, id=vendedor_id)
     if request.method == 'POST':

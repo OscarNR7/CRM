@@ -124,36 +124,36 @@
                         <ul class="pagination justify-content-center">
                             {% if logs.has_previous %}
                                 <li class="page-item">
-                                    <a class="page-link" href="?page=1">&laquo; Primera</a>
+                                    <a class="page-link text-dark" href="?page=1">&laquo; Primera</a>
                                 </li>
                                 <li class="page-item">
-                                    <a class="page-link" href="?page={{ logs.previous_page_number }}">Anterior</a>
+                                    <a class="page-link text-dark" href="?page={{ logs.previous_page_number }}">Anterior</a>
                                 </li>
                             {% endif %}
-    
+
                             <li class="page-item active">
-                                <span class="page-link">
+                                <span class="page-link bg-dark border-dark">
                                     Página {{ logs.number }} de {{ logs.paginator.num_pages }}
                                 </span>
                             </li>
-    
+
                             {% if logs.has_next %}
                                 <li class="page-item">
-                                    <a class="page-link" href="?page={{ logs.next_page_number }}">Siguiente</a>
+                                    <a class="page-link text-dark" href="?page={{ logs.next_page_number }}">Siguiente</a>
                                 </li>
                                 <li class="page-item">
-                                    <a class="page-link" href="?page={{ logs.paginator.num_pages }}">Última &raquo;</a>
+                                    <a class="page-link text-dark" href="?page={{ logs.paginator.num_pages }}">Última &raquo;</a>
                                 </li>
                             {% endif %}
                         </ul>
                     </nav>
                     {% endif %}
-                {% else %}
-                    <div class="text-center py-5">
-                        <i class="fas fa-clipboard-list fa-3x text-muted mb-3"></i>
-                        <h5 class="text-muted">No hay registros de actividad disponibles</h5>
-                    </div>
-                {% endif %}
+                    {% else %}
+                        <div class="text-center py-5">
+                            <i class="fas fa-clipboard-list fa-3x text-muted mb-3"></i>
+                            <h5 class="text-muted">No hay registros de actividad disponibles</h5>
+                        </div>
+                    {% endif %}
                 <form action="{% url 'clean_logs' %}" method="post" style="display:inline;">
                     {% csrf_token %}
                     <button type="submit" class="btn btn-danger mb-3" onclick="return confirm('¿Estás seguro de que deseas eliminar los logs antiguos? Esta acción no se puede deshacer.');">
