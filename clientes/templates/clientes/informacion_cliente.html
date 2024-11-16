@@ -27,7 +27,7 @@
                 <table class="table table-dark table-striped ">
                     <thead>
                         <tr>
-                            <th>Id</th>
+                            <th>ID</th>
                             <th>Nombre</th>
                             <th>Curp</th>
                         </tr>
@@ -83,11 +83,13 @@
                     </tbody>
                     <thead>
                         <tr>
+                            <th>Cambio de AFORE</th>
                             <th>Observaciones</th>
                         </tr>
                     </thead>
                     <tbody class="table-group-divider" >
                         <tr>
+                            <td>{{ cliente.get_cambio_de_afore_display }}</td>
                             <td colspan="3">{{ cliente.observaciones }}</td>
                         </tr>
                     </tbody>

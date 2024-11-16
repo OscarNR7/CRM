@@ -1,5 +1,6 @@
 from django import forms
 from .models import *
+from django.db.models import Q
 from django.core.exceptions import ValidationError
 from django.forms import modelformset_factory
 from datetime import datetime
@@ -105,12 +106,52 @@ class ClienteForm(forms.ModelForm):
         return instance
 
 class VendedorForm(forms.ModelForm):
+    usuario = forms.ModelChoiceField(
+        queryset=User.objects.none(),
+        required=False,
+        empty_label="Seleccione un usuario",
+        widget=forms.Select(attrs={
+            'class': 'form-control',
+            'placeholder': 'Seleccione un usuario'
+        })
+    )
+
     class Meta:
         model = Vendedor
-        fields = ['nombre']
+        fields = ['nombre', 'usuario']
         widgets = {
-            'nombre': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Nombre del Vendedor'})
+            'nombre': forms.TextInput(attrs={
+                'class': 'form-control', 
+                'placeholder': 'Nombre del Vendedor'
+            })
         }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        
+        # Primero, obtener todos los usuarios que son vendedores
+        usuarios_query = User.objects.filter(userrole__role='vendedor')
+        
+        # Si estamos editando un vendedor existente
+        if self.instance and self.instance.pk:
+            if self.instance.usuario:
+                # Incluir el usuario actual del vendedor
+                usuarios_disponibles = usuarios_query.filter(
+                    Q(vendedor__isnull=True) | Q(id=self.instance.usuario.id)
+                )
+            else:
+                # Si no tiene usuario asignado, mostrar solo los disponibles
+                usuarios_disponibles = usuarios_query.filter(vendedor__isnull=True)
+        else:
+            # Para nuevo vendedor, mostrar solo usuarios sin asignar
+            usuarios_disponibles = usuarios_query.filter(vendedor__isnull=True)
+
+        # Optimizar la consulta y ordenar
+        self.fields['usuario'].queryset = usuarios_disponibles.distinct().order_by('username')
+        
+        # Establecer el valor inicial si hay un usuario asignado
+        if self.instance and self.instance.usuario:
+            self.fields['usuario'].initial = self.instance.usuario.id
 
 
 class PagoForm(forms.ModelForm):

@@ -19,5 +19,6 @@ urlpatterns = [
     path('clientes/<int:cliente_id>/informacion/', views.informacion_cliente, name = 'informacion'),
     path('vendedores/eliminar/<int:vendedor_id>', v_views.eliminar_vendedor, name='eliminar_vendedor'),
     path('telefono/eliminar/<int:telefono_id>/', views.eliminar_telefono, name='telefono_eliminar'),
+    path('editar-vendedor/<int:vendedor_id>/', v_views.editar_vendedor, name='editar_vendedor'),
 
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)  

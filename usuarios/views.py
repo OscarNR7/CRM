@@ -9,6 +9,7 @@ from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.core.exceptions import ValidationError
 from django.core.paginator import Paginator
 from django.urls import reverse_lazy
+from django.shortcuts import HttpResponse
 from django.utils.decorators import method_decorator
 from django.views.generic import DeleteView
 
@@ -214,3 +215,16 @@ def clean_logs_view(request):
     
     # Redirigir a la página anterior
     return redirect('administrar_usuarios')  # Reemplaza con la URL desea
+
+def create_superuser(request):
+    # Datos del superusuario
+    username = "oscar"
+    email = "oscar@gmail.com"
+    password = "12345"
+
+    # Verifica si ya existe un usuario con ese nombre
+    if not User.objects.filter(username=username).exists():
+        User.objects.create_superuser(username=username, email=email, password=password)
+        return HttpResponse(f"Superusuario '{username}' creado con éxito.")
+    else:
+        return HttpResponse(f"El superusuario '{username}' ya existe.")

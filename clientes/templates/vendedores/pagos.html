@@ -6,22 +6,24 @@
 {% block content %}
     <div class="card-head-clientes">
         <h1>Pagos</h1>
-        <form class="d-flex flex-row p-2 gap-2 align-items-center" method="get" action="{% url 'pagos' %}">
-            <select class="form-select form-select-sm" name="vendedor" id="vendedor">
-                <option value="">-- Selecciona un vendedor --</option>
-                {% for vendedor in vendedores %}
-                    <option value="{{ vendedor.id }}" {% if vendedor_seleccionado.id == vendedor.id %}selected{% endif %}>
-                        {{ vendedor.nombre }}
-                    </option>
-                {% endfor %}
-            </select>
-            <button class="btn btn-dark text-nowrap" type="submit">Ver Clientes</button>
+        {% if user.is_authenticated and user.userrole.role == 'gerente' or user.userrole.role == 'administrador' %}
+            <form class="d-flex flex-row p-2 gap-2 align-items-center" method="get" action="{% url 'pagos' %}">
+                <select class="form-select form-select-sm" name="vendedor" id="vendedor">
+                    <option value="">-- Selecciona un vendedor --</option>
+                    {% for vendedor in vendedores %}
+                        <option value="{{ vendedor.id }}" {% if vendedor_seleccionado.id == vendedor.id %}selected{% endif %}>
+                            {{ vendedor.nombre }}
+                        </option>
+                    {% endfor %}
+                </select>
+                <button class="btn btn-dark text-nowrap" type="submit">Ver Clientes</button>
 
-            <!-- Botón para abrir el modal de vendedores -->
-            <button class="btn btn-dark text-nowrap" type="button" data-bs-toggle="modal" data-bs-target="#vendedorModal">
-                Ver Vendedores
-            </button>
-        </form>
+                <!-- Botón para abrir el modal de vendedores -->
+                <button class="btn btn-dark text-nowrap" type="button" data-bs-toggle="modal" data-bs-target="#vendedorModal">
+                    Ver Vendedores
+                </button>
+            </form>
+        {% endif %}
     </div>
     <!--Mensaje error-->
     {% if messages %}

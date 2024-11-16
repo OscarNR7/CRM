@@ -1,0 +1,5 @@
+<form method="POST" id="editar-vendedor-form">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit" class="btn btn-success">Guardar cambios</button>
+</form>

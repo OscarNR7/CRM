@@ -4,25 +4,34 @@
         <tr>
             <th>ID</th>
             <th>Nombre</th>
+            <th>Usuario Asignado</th>
             {% if user.is_authenticated and user.userrole.role == 'gerente' %}
-                <th>Acciones</th>
+            <th>Acciones</th>
             {% endif %}
         </tr>
     </thead>
     <tbody>
         {% for vendedor in vendedores_paginados %}
-            <tr>
-                <td>{{ vendedor.id }}</td>
-                <td>{{ vendedor.nombre }}</td>
-                {% if user.is_authenticated and user.userrole.role == 'gerente' %}
-                    <td>
-                        <form action="{% url 'eliminar_vendedor' vendedor.id %}" method="post" style="display: inline;">
-                            {% csrf_token %}
-                            <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('¿Estás seguro de que deseas eliminar a este vendedor?');">Eliminar</button>
-                        </form> 
-                    </td>
+        <tr>
+            <td>{{ vendedor.id }}</td>
+            <td>{{ vendedor.nombre }}</td>
+            <td>
+                {% if vendedor.usuario %}
+                {{ vendedor.usuario.username }}
+                {% else %}
+                <span class="text-muted">Sin asignar</span>
                 {% endif %}
-            </tr>
+            </td>
+            {% if user.is_authenticated and user.userrole.role == 'gerente' %}
+            <td>
+                <button onclick="mostrarEditar('{{ vendedor.id }}', '{{ vendedor.nombre|escapejs }}')" class="btn btn-primary btn-sm">Editar</button>
+                <form action="{% url 'eliminar_vendedor' vendedor.id %}" method="post" style="display: inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('¿Estás seguro de que deseas eliminar a este vendedor?');">Eliminar</button>
+                </form>
+            </td>
+            {% endif %}
+        </tr>
         {% endfor %}
     </tbody>
 </table>
@@ -32,41 +41,151 @@
 <nav aria-label="Navegación de páginas" class="mt-4">
     <ul class="pagination justify-content-center">
         {% if vendedores_paginados.has_previous %}
-            <!-- <li class="page-item">
-                <a href="#" class="page-link text-dark vendedor-page-link" data-page="1">&laquo; Primera</a>
-            </li> -->
-            <li class="page-item">
-                <a href="#" class="page-link text-dark vendedor-page-link" data-page="{{ vendedores_paginados.previous_page_number }}">Anterior</a>
-            </li>
+        <li class="page-item">
+            <a href="#" class="page-link text-dark vendedor-page-link" data-page="{{ vendedores_paginados.previous_page_number }}">Anterior</a>
+        </li>
         {% endif %}
-
         <li class="page-item active">
             <span class="page-link bg-dark border-dark">
                 Página {{ vendedores_paginados.number }} de {{ vendedores_paginados.paginator.num_pages }}
             </span>
         </li>
-
         {% if vendedores_paginados.has_next %}
-            <li class="page-item">
-                <a href="#" class="page-link text-dark vendedor-page-link" data-page="{{ vendedores_paginados.next_page_number }}">Siguiente</a>
-            </li>
-            <!-- <li class="page-item">
-                <a href="#" class="page-link text-dark vendedor-page-link" data-page="{{ vendedores_paginados.paginator.num_pages }}">Última &raquo;</a>
-            </li> -->
+        <li class="page-item">
+            <a href="#" class="page-link text-dark vendedor-page-link" data-page="{{ vendedores_paginados.next_page_number }}">Siguiente</a>
+        </li>
         {% endif %}
     </ul>
 </nav>
 {% endif %}
 
-<!-- Formulario para agregar vendedor si el usuario es gerente o administrador -->
+<!-- Botones de acción -->
 {% if user.is_authenticated and user.userrole.role == 'gerente' or user.userrole.role == 'administrador' %}
+<div class="mb-3">
+    <button onclick="mostrarAgregar()" class="btn btn-success" id="btnAgregar">Agregar Nuevo Vendedor</button>
+</div>
+
+<!-- Formulario para agregar vendedor -->
+<div id="formAgregar" style="display: none;">
     <hr class="border border-light border-3 opacity-75">
+    <h4>Agregar Vendedor</h4>
     <form method="POST" action="{% url 'agregar_vendedor' %}">
         {% csrf_token %}
-        <p>Agregar Vendedor</p>
         <div class="mb-3">
             {{ vendedor_form.as_p }}
         </div>
         <button type="submit" class="btn btn-success">Guardar</button>
+        <button type="button" class="btn btn-secondary" onclick="cancelarForm()">Cancelar</button>
     </form>
+</div>
+
+<!-- Formulario para editar vendedor -->
+<div id="formEditar" style="display: none;">
+    <hr class="border border-light border-3 opacity-75">
+    <h4>Editar Vendedor</h4>
+    <form method="POST" id="editarForm">
+        {% csrf_token %}
+        <div class="mb-3">
+            {{ vendedor_form.as_p }}
+        </div>
+        <button type="submit" class="btn btn-primary">Actualizar</button>
+        <button type="button" class="btn btn-secondary" onclick="cancelarForm()">Cancelar</button>
+    </form>
+</div>
 {% endif %}
+
+<script>
+function mostrarAgregar() {
+    document.getElementById('formAgregar').style.display = 'block';
+    document.getElementById('formEditar').style.display = 'none';
+    document.getElementById('btnAgregar').style.display = 'none';
+}
+
+function mostrarEditar(id, nombre) {
+    document.getElementById('formEditar').style.display = 'block';
+    document.getElementById('formAgregar').style.display = 'none';
+    document.getElementById('btnAgregar').style.display = 'none';
+    
+    // Hacer una petición AJAX para obtener los datos del vendedor
+    fetch(`/editar-vendedor/${id}/`)
+        .then(response => response.text())
+        .then(html => {
+            // Encontrar el contenedor del formulario
+            const formContainer = document.querySelector('#formEditar .mb-3');
+            // Actualizar solo el contenido del formulario
+            formContainer.innerHTML = html;
+            
+            // Actualizar la acción del formulario
+            document.getElementById('editarForm').action = `/editar-vendedor/${id}/`;
+            
+            // Rellenar el campo nombre
+            const nombreInput = formContainer.querySelector('input[name="nombre"]');
+            if (nombreInput) {
+                nombreInput.value = nombre;
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error al cargar los datos del vendedor');
+        });
+}
+
+// Agregar manejador para el envío del formulario
+document.getElementById('editarForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const formData = new FormData(this);
+    
+    fetch(this.action, {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Recargar la página o actualizar la tabla
+            location.reload();
+        } else {
+            // Mostrar errores
+            alert(Object.values(data.errors).flat().join('\n'));
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Error al actualizar el vendedor');
+    });
+});
+
+function cancelarForm() {
+    document.getElementById('formAgregar').style.display = 'none';
+    document.getElementById('formEditar').style.display = 'none';
+    document.getElementById('btnAgregar').style.display = 'block';
+}
+</script>
+
+<style>
+.mb-3 p {
+    margin-bottom: 0.5rem;
+}
+
+.mb-3 input {
+    width: 100%;
+    padding: 0.375rem 0.75rem;
+    font-size: 1rem;
+    line-height: 1.5;
+    color: #495057;
+    background-color: #fff;
+    border: 1px solid #ced4da;
+    border-radius: 0.25rem;
+    margin-bottom: 1rem;
+}
+
+.mb-3 label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: #fff;
+}
+</style>
