@@ -65,6 +65,7 @@ Clientes
                                     <th>NSS</th>
                                     <th>Tel</th>
                                     <th>Vendedor</th>
+                                    <th>Cambio de AFORE</th>
                                     {% if user.is_authenticated and user.userrole.role == 'gerente' %}
                                         <th>Acciones</th>
                                     {% endif %}
@@ -80,7 +81,7 @@ Clientes
                                         <td>{{ cliente.get_telefonos_display|safe }}</td>
                                         <td>{{ cliente.vendedor }}</td>
                                         <td class="{% if cliente.cambio_de_afore == 'pendiente' %}text-warning{% endif %}">
-                                            {{ cliente.cambio_de_afore }}
+                                            {{ cliente.get_cambio_de_afore_display }}
                                         </td>
 
                                         <!-- <td>
@@ -108,7 +109,7 @@ Clientes
 
                                         
                                             <td class="align-middle">
-                                                <div class="d-flex flex-row">
+                                                <div class="d-flex flex-row justify-content-center">
                                                     {% if user.is_authenticated and user.userrole.role == 'gerente' %}
                                                         <a class="btn btn-sm btn-info m-1" href="{% url 'editar' cliente.id %}">Editar</a>
                                                         <a class="btn btn-sm btn-danger m-1" href="{% url 'eliminar' cliente.id %}">Eliminar</a>

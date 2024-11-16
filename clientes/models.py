@@ -2,6 +2,8 @@ import logging
 from typing import Any
 from django.db import models
 from django.core.validators import MinValueValidator
+from django.core.validators import RegexValidator
+from django.contrib.auth.models import User
 from datetime import timedelta,datetime
 from cloudinary.models import CloudinaryField
 
@@ -10,6 +12,13 @@ logger = logging.getLogger('clientes')
 class Vendedor(models.Model):
     id = models.AutoField(primary_key=True)
     nombre = models.CharField(max_length=100)
+    usuario = models.OneToOneField(
+        User, 
+        on_delete=models.SET_NULL, 
+        null=True, 
+        blank=True,
+        related_name='vendedor'
+    )
 
     class Meta:
         verbose_name_plural = "Vendedores"
@@ -26,7 +35,14 @@ class Cliente(models.Model):
     id = models.AutoField(primary_key=True)
     nombre = models.CharField(max_length=255, help_text="Nombre del cliente")
     curp = models.CharField(max_length=100, unique=True,  help_text="Clave Única de Registro de Población (CURP)")
-    nss = models.CharField(max_length=100, unique=True, help_text="Número de Seguridad Social (NSS)")
+    nss = models.CharField(max_length=100, unique=True, help_text="Número de Seguridad Social (NSS)",
+            validators=[
+                RegexValidator(
+                    regex=r'^\d+$',
+                    message="El NSS solo debe contener números."
+                )
+            ]
+        )
     fecha_de_firma = models.DateField(null=True, blank=True, help_text="Fecha de Firma (DD/MM/YYYY)")
     fecha_de_baja = models.CharField(max_length=50, null=True, blank=True, help_text="Fecha de Baja")
     fecha_para_capturar_retiro = models.CharField(max_length=50, null=True, blank=True, help_text="Fecha para capturar retiro")
@@ -38,6 +54,10 @@ class Cliente(models.Model):
     colonia = models.CharField(blank=True,max_length=255, help_text="Colonia de residencia del cliente")
     cambio_de_afore = models.CharField(max_length=20,choices=OPCIONES_ESTADO,null=True, blank=True)
 
+    fotografia = models.ImageField(upload_to='clientes/fotos/', null=True,blank=True,verbose_name="Foto", help_text="Fotografía del cliente")
+    foto_aval = models.ImageField(upload_to='clientes/fotos/', null= True,blank=True,verbose_name='Foto',help_text="Fotografia del Aval")
+    
+    # Métodos y otras configuraciones...
     fotografia = CloudinaryField(
         verbose_name='Fotografía del cliente',
         resource_type='image',

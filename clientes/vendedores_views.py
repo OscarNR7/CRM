@@ -13,12 +13,13 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.paginator import Paginator
 from django.db.models import Q, Prefetch, DateField
 from django.db.models.functions import Cast, ExtractWeek
-from django.http import HttpResponse
+from django.http import HttpResponse,JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.template.loader import render_to_string
 from django.urls import reverse_lazy, reverse
 from django.utils.decorators import method_decorator
 from django.views.generic import ListView, DeleteView
+from django.db import IntegrityError, transaction
 
 # Importaciones de la aplicación local
 from .forms import *
@@ -32,37 +33,76 @@ logger = logging.getLogger('clientes')
 @login_required
 @administrador_required
 def agregar_vendedor(request):
-    '''
-        Agrega un nuevo vendedor a la base de datos.
-        Args: request (HttpRequest): peticion HTTP.
-    '''
     try:
         if request.method == 'POST':
             vendedor_form = VendedorForm(request.POST)
             if vendedor_form.is_valid():
                 vendedor = vendedor_form.save()
-                log_user_activity(
-                    user=request.user,
-                    action="Agregó",
-                    target=f"Al vendedor: {vendedor.nombre}",
-                    app_name="vendedores"
-                )
+                
+                # Si se asignó un usuario, registrarlo en el log
+                if vendedor.usuario:
+                    log_user_activity(
+                        user=request.user,
+                        action="Agregó",
+                        target=f"Al vendedor: {vendedor.nombre} y lo asignó al usuario: {vendedor.usuario.username}",
+                        app_name="vendedores"
+                    )
+                else:
+                    log_user_activity(
+                        user=request.user,
+                        action="Agregó",
+                        target=f"Al vendedor: {vendedor.nombre}",
+                        app_name="vendedores"
+                    )
+                    
+                messages.success(request, "Vendedor agregado exitosamente.")
                 return redirect('pagos')
-      
+            else:
+                messages.error(request, "Por favor corrija los errores en el formulario.")
+                
     except Exception as e:
         messages.error(request, "Error al agregar el vendedor.")
-        logger.error(f"Error en agregar_vendedor: {e}")  # Registro del error
-    return render(request, 'vendedores/pagos.html', {'vendedor_form': VendedorForm()})  
+        logger.error(f"Error en agregar_vendedor: {e}")
+    
+    return render(request, 'vendedores/pagos.html', {'vendedor_form': VendedorForm()})
 
-class ListarVendedores(LoginRequiredMixin,ListView):
-    '''
-        Lista todos los vendedores existentes en la base de datos.
-        Args: request (HttpRequest): peticion HTTP.
-    '''
+@login_required
+def editar_vendedor(request, vendedor_id):
+    vendedor = get_object_or_404(Vendedor.objects.select_related('usuario'), id=vendedor_id)
+    
+    if request.method == 'POST':
+        form = VendedorForm(request.POST, instance=vendedor)
+        if form.is_valid():
+            try:
+                with transaction.atomic():
+                    vendedor = form.save()
+                    log_user_activity(
+                        user=request.user,
+                        action="Editó",
+                        target=f"Al vendedor: {vendedor.nombre}",
+                        app_name="vendedores"
+                    )
+                    messages.success(request, f"Vendedor {vendedor.nombre} actualizado correctamente.")
+            except Exception as e:
+                messages.error(request, f"Error al actualizar el vendedor: {e}")
+        else:
+            for field, errors in form.errors.items():
+                for error in errors:
+                    messages.error(request, f"{field}: {error}")
+        return redirect('pagos')  # Cambia a la URL correspondiente
+
+    else:
+        form = VendedorForm(instance=vendedor)
+        return HttpResponse(form.as_p())
+
+class ListarVendedores(LoginRequiredMixin, ListView):
     model = Vendedor
     template_name = 'vendedores/pagos.html'
     context_object_name = 'vendedores'
     paginate_by = 5
+
+    def get_queryset(self):
+        return Vendedor.objects.select_related('usuario').all()
 
 def get_week_of_year(fecha):
     """
@@ -101,20 +141,34 @@ class PagosClientes(LoginRequiredMixin, ListView):
     context_object_name = 'pagos_por_semana'
 
     def get_queryset(self):
+        user_role = self.request.user.userrole.role
         vendedor_id = self.request.GET.get('vendedor')
-        if not vendedor_id:
-            return {}
+        
         try:
-            if vendedor_id:
-                clientes = Cliente.objects.filter(vendedor_id=vendedor_id).prefetch_related(
+            if user_role == 'vendedor':
+                # Si es vendedor, automáticamente obtener sus clientes
+                vendedor = get_object_or_404(Vendedor, usuario=self.request.user)
+                clientes = Cliente.objects.filter(vendedor=vendedor).prefetch_related(
                     Prefetch('pagos', queryset=Pago.objects.order_by('fecha_de_pago'))
                 )
+            elif user_role in ['gerente', 'administrador']:
+                # Mantener la lógica actual para gerentes y administradores
+                if vendedor_id:
+                    clientes = Cliente.objects.filter(vendedor_id=vendedor_id).prefetch_related(
+                        Prefetch('pagos', queryset=Pago.objects.order_by('fecha_de_pago'))
+                    )
+                else:
+                    clientes = Cliente.objects.all().prefetch_related(
+                        Prefetch('pagos', queryset=Pago.objects.order_by('fecha_de_pago'))
+                    )
+            else:
+                return {}
 
             pagos_por_semana = {}
 
             for cliente in clientes:
                 try:
-                    # Convertir la fecha de string a objeto date
+                    # Convertir la fecha de string a objeto date si es necesario
                     if isinstance(cliente.fecha_de_firma, str):
                         fecha = datetime.strptime(cliente.fecha_de_firma, '%d-%b-%y').date()
                     else:
@@ -122,13 +176,9 @@ class PagosClientes(LoginRequiredMixin, ListView):
 
                     # Obtener el año y semana ISO
                     año_iso, semana_iso = get_iso_calendar_data(fecha)
-                    
+
                     # Calcular las fechas de inicio y fin de la semana
                     inicio_semana, fin_semana = get_fechas_semana(fecha)
-
-                    # Si la semana incluye días de dos años diferentes,
-                    # usar el año correcto según las reglas ISO
-                    año_mostrar = año_iso
 
                     # Crear clave única para cada semana
                     clave = f"{año_iso}-{semana_iso}"
@@ -139,7 +189,7 @@ class PagosClientes(LoginRequiredMixin, ListView):
                             'fecha_inicio': inicio_semana,
                             'fecha_fin': fin_semana,
                             'semana': semana_iso,
-                            'año': año_mostrar
+                            'año': año_iso
                         }
                     pagos_por_semana[clave]['clientes'].append({
                         'cliente': cliente,
@@ -150,9 +200,7 @@ class PagosClientes(LoginRequiredMixin, ListView):
                     logger.error(f"Error procesando fecha para cliente {cliente.id}: {e}")
                     continue
 
-            # Ordenar por año y semana
             return dict(sorted(pagos_por_semana.items(), key=lambda x: (x[1]['año'], x[1]['semana'])))
-            
         except Exception as e:
             messages.error(self.request, "Ocurrió un error al obtener los pagos.")
             logger.error(f"Error en PagosClientes.get_queryset: {e}")
@@ -160,21 +208,29 @@ class PagosClientes(LoginRequiredMixin, ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['vendedores'] = Vendedor.objects.all().order_by('nombre')
+        user_role = self.request.user.userrole.role
 
-        # Lógica de paginación de vendedores
-        vendedores_paginados = context['vendedores']
-        vendedor_paginator = Paginator(vendedores_paginados, 5)
-        vendedor_page = self.request.GET.get('vendedor_page')
-        context['vendedores_paginados'] = vendedor_paginator.get_page(vendedor_page)
+        if user_role in ['gerente', 'administrador']:
+            # Solo mostrar el selector de vendedores para gerentes y administradores
+            context['vendedores'] = Vendedor.objects.all().order_by('nombre')
+            
+            # Lógica de paginación de vendedores
+            vendedores_paginados = context['vendedores']
+            vendedor_paginator = Paginator(vendedores_paginados, 5)
+            vendedor_page = self.request.GET.get('vendedor_page')
+            context['vendedores_paginados'] = vendedor_paginator.get_page(vendedor_page)
 
-        vendedor_id = self.request.GET.get('vendedor')
-        if vendedor_id:
-            context['vendedor_seleccionado'] = Vendedor.objects.get(id=vendedor_id)
+            vendedor_id = self.request.GET.get('vendedor')
+            if vendedor_id:
+                context['vendedor_seleccionado'] = Vendedor.objects.get(id=vendedor_id)
 
-        # Agregar el formulario de vendedores para el modal
-        context['vendedor_form'] = VendedorForm()
-        
+            # Agregar el formulario de vendedores para el modal
+            context['vendedor_form'] = VendedorForm()
+        elif user_role == 'vendedor':
+            # Para vendedores, agregar su información al contexto
+            vendedor = get_object_or_404(Vendedor, usuario=self.request.user)
+            context['vendedor_seleccionado'] = vendedor
+            
         return context
 
     def get(self, request, *args, **kwargs):

@@ -47,6 +47,16 @@ class ListarClientes(LoginRequiredMixin,ListView):
         orden = self.request.GET.get('orden', 'nombre')  # Orden por defecto es por nombre
         queryset = Cliente.objects.all()
         
+        if self.request.user.userrole.role in ['gerente', 'administrador']:
+            queryset = Cliente.objects.all()
+        else:
+            # Obtener el vendedor asociado al usuario actual
+            try:
+                vendedor = self.request.user.vendedor
+                queryset = Cliente.objects.filter(vendedor=vendedor)
+            except Vendedor.DoesNotExist:
+                queryset = Cliente.objects.none()
+
         # Filtrado de búsqueda
         if query:
             terms = query.split()
