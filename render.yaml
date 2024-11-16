@@ -1,8 +1,8 @@
 databases:
-  - name: mysitedb
+  - name: kavajo-db
     plan: free
-    databaseName: mysite
-    user: mysite
+    databaseName: kavajo
+    user: kavajo_user
 
 services:
   - type: web
@@ -14,7 +14,7 @@ services:
     envVars:
       - key: DATABASE_URL
         fromDatabase:
-          name: mysitedb
+          name: kavajo-db
           property: connectionString
       - key: SECRET_KEY
         generateValue: true
