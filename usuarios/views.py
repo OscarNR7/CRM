@@ -12,6 +12,7 @@ from django.urls import reverse_lazy
 from django.shortcuts import HttpResponse
 from django.utils.decorators import method_decorator
 from django.views.generic import DeleteView
+from django.db import connection
 
 # Importaciones de aplicaciones locales
 from .models import *
@@ -228,3 +229,8 @@ def create_superuser(request):
         return HttpResponse(f"Superusuario '{username}' creado con éxito.")
     else:
         return HttpResponse(f"El superusuario '{username}' ya existe.")
+    
+def reset_database(request):
+    with connection.cursor() as cursor:
+        cursor.execute("DROP SCHEMA public CASCADE; CREATE SCHEMA public;")
+    return HttpResponse("Base de datos reiniciada con éxito.")

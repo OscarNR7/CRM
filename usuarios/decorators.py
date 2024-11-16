@@ -41,5 +41,5 @@ def vendedor_required(view_func):
             except UserRole.DoesNotExist:
                 pass
         # Si no es vendedor, gerente o administrador, redirigir o denegar
-        return redirect('clientes')  # O usar `raise PermissionDenied`
+        return redirect('clientes')  # O `raise PermissionDenied`
     return _wrapped_view

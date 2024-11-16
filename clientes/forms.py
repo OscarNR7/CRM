@@ -146,7 +146,6 @@ class VendedorForm(forms.ModelForm):
             # Para nuevo vendedor, mostrar solo usuarios sin asignar
             usuarios_disponibles = usuarios_query.filter(vendedor__isnull=True)
 
-        # Optimizar la consulta y ordenar
         self.fields['usuario'].queryset = usuarios_disponibles.distinct().order_by('username')
         
         # Establecer el valor inicial si hay un usuario asignado

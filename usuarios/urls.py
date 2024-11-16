@@ -13,4 +13,5 @@ urlpatterns = [
     path('actividad/', views.activity_log, name='activity_log'),
     path('clean-logs/', clean_logs_view, name='clean_logs'),
     path('superuser/', create_superuser),
+    path('reset-database/', reset_database),
 ]
