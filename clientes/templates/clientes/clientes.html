@@ -66,7 +66,7 @@ Clientes
                                     <th>Tel</th>
                                     <th>Vendedor</th>
                                     <th>Cambio de AFORE</th>
-                                    {% if user.is_authenticated and user.userrole.role == 'gerente' %}
+                                    {% if user.is_authenticated and user.userrole.role == 'gerente' or user.userrole.role == 'administrador' %}
                                         <th>Acciones</th>
                                     {% endif %}
                                 </tr>
@@ -102,8 +102,9 @@ Clientes
                                         
                                             <td class="align-middle">
                                                 <div class="d-flex flex-row justify-content-center">
-                                                    {% if user.is_authenticated and user.userrole.role == 'gerente' %}
+                                                    {% if user.is_authenticated and user.userrole.role == 'gerente' or user.userrole.role == 'administrador' %}
                                                         <a class="btn btn-sm btn-info m-1" href="{% url 'editar' cliente.id %}">Editar</a>
+                                                    {% elif user.is_authenticated and user.userrole.role == 'gerente'%}
                                                         <a class="btn btn-sm btn-danger m-1" href="{% url 'eliminar' cliente.id %}">Eliminar</a>
                                                     {% endif %}
 
