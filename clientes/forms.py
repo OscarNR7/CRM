@@ -24,7 +24,7 @@ class ClienteForm(forms.ModelForm):
         required=False,
         widget=forms.TextInput(attrs={
             'class': 'form-control',
-            'placeholder': 'DD-Mes-YYYY o DD/Mes/YYYY',
+            'placeholder': 'DD-Mes o DD-Mes-YYYY',
             
         })
     )
@@ -46,7 +46,7 @@ class ClienteForm(forms.ModelForm):
             'curp': forms.TextInput(attrs={'class': 'form-control'}),
             'nss': forms.TextInput(attrs={'class': 'form-control'}),
             'telefono': forms.TextInput(attrs={'class': 'form-control'}),
-            'fecha_de_firma': forms.DateInput(attrs={'class': 'form-control', 'placeholder': 'DD de Mes de YYYY'}),
+            'fecha_de_firma': forms.DateInput(attrs={'class': 'form-control', 'placeholder': 'DD/MMM/YYYY'}),
             'observaciones': forms.TextInput(attrs={'class': 'form-control', 'rows': 2}),
             'direccion': forms.TextInput(attrs={'class': 'form-control', 'rows': 3}),
             'colonia': forms.TextInput(attrs={'class': 'form-control'}),
@@ -164,5 +164,4 @@ class PagoForm(forms.ModelForm):
             'cancelacion': forms.TextInput(attrs={'class': 'form-control'}),
             'cantidad': forms.TextInput(attrs={'class': 'form-control'}),
             'anticipo': forms.TextInput(attrs={'class': 'form-control'}),
-            'observaciones': forms.TextInput(attrs={'class': 'form-control', 'rows': 2}),
         }

@@ -130,7 +130,7 @@ def agregar_cliente(request):
     })
 
 @login_required
-@gerente_required
+@administrador_required
 def editar_cliente(request, id):
     cliente = get_object_or_404(Cliente, id=id)
     
