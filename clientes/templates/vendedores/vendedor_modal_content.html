@@ -5,7 +5,7 @@
             <th>ID</th>
             <th>Nombre</th>
             <th>Usuario Asignado</th>
-            {% if user.is_authenticated and user.userrole.role == 'gerente' %}
+            {% if user.is_authenticated and user.userrole.role == 'gerente' or user.userrole.role == 'administrador' %}
             <th>Acciones</th>
             {% endif %}
         </tr>
@@ -22,9 +22,11 @@
                 <span class="text-muted">Sin asignar</span>
                 {% endif %}
             </td>
-            {% if user.is_authenticated and user.userrole.role == 'gerente' %}
+            {% if user.is_authenticated and user.userrole.role == 'gerente' or user.userrole.role == 'administrador' %}
             <td>
+            
                 <button onclick="mostrarEditar('{{ vendedor.id }}', '{{ vendedor.nombre|escapejs }}')" class="btn btn-primary btn-sm">Editar</button>
+            {% elif user.is_authenticated and user.userrole.role == 'gerente' %}
                 <form action="{% url 'eliminar_vendedor' vendedor.id %}" method="post" style="display: inline;">
                     {% csrf_token %}
                     <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('¿Estás seguro de que deseas eliminar a este vendedor?');">Eliminar</button>

@@ -67,6 +67,7 @@ def agregar_vendedor(request):
     return render(request, 'vendedores/pagos.html', {'vendedor_form': VendedorForm()})
 
 @login_required
+@administrador_required
 def editar_vendedor(request, vendedor_id):
     vendedor = get_object_or_404(Vendedor.objects.select_related('usuario'), id=vendedor_id)
     
@@ -245,7 +246,7 @@ class PagosClientes(LoginRequiredMixin, ListView):
         return super().get(request, *args, **kwargs)
 
 @login_required
-@gerente_required
+@administrador_required
 def agregar_editar_pago(request, cliente_id,vendedor_id):
     cliente = get_object_or_404(Cliente, id=cliente_id)
     vendedor = get_object_or_404(Vendedor, id=vendedor_id)

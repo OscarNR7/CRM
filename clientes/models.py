@@ -28,7 +28,7 @@ class Vendedor(models.Model):
 class Cliente(models.Model):
     OPCIONES_ESTADO = [
         ('no_necesario', 'No necesario'),
-        ('necesario', 'Necesario'),
+        ('listo', 'Listo'),
         ('pendiente', 'Pendiente'),
     ]
     #Definición de los campos para almacenar la información de los clientes

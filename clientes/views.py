@@ -63,12 +63,21 @@ class ListarClientes(LoginRequiredMixin,ListView):
             search_filters = Q()
             for term in terms:
                 if term:
-                    search_filters |= (Q(nombre__icontains=term) |
-                                       Q(curp__icontains=term) |
-                                       Q(nss__icontains=term) |
-                                       Q(direccion__icontains=term) |
-                                       Q(colonia__icontains=term) |
-                                       Q(vendedor__nombre__icontains=term))
+                    search_filters |= (
+                        Q(nombre__icontains=term) |
+                        Q(curp__icontains=term) |
+                        Q(nss__icontains=term) |
+                        Q(direccion__icontains=term) |
+                        Q(colonia__icontains=term) |
+                        Q(vendedor__nombre__icontains=term) |
+                        Q(cambio_de_afore__icontains=term) |
+                        Q(fecha_de_firma__icontains=term) |
+                        Q(fecha_de_baja__icontains=term) |
+                        Q(fecha_para_capturar_retiro__icontains=term) |
+                        Q(alta__icontains=term) |
+                        Q(rcv__icontains=term)|
+                        Q(telefonos__numero__icontains=term)
+                    )
             queryset = queryset.filter(search_filters)
         
         # Ordenar por el criterio seleccionado
@@ -130,7 +139,7 @@ def agregar_cliente(request):
     })
 
 @login_required
-@gerente_required
+@administrador_required
 def editar_cliente(request, id):
     cliente = get_object_or_404(Cliente, id=id)
     
