@@ -83,23 +83,6 @@ Clientes
                                         <td class="{% if cliente.cambio_de_afore == 'pendiente' %}text-warning{% endif %}">
                                             {{ cliente.get_cambio_de_afore_display }}
                                         </td>
-
-                                        <!-- <td>
-                                            {% if cliente.fotografia %}
-                                                <img src="{{ cliente.fotografia.url }}" height="50" class="thumbnail" onclick="mostrarImagen(this.src)">
-                                            {% else %}
-                                                Sin fotografía
-                                            {% endif %}
-                                        </td>
-                                        <td>
-                                            {% if cliente.foto_aval %}
-                                                <img src="{{ cliente.foto_aval.url }}" height="50" class="thumbnail" onclick="mostrarImagen(this.src)">   
-                                            {% else %}
-                                                Sin aval
-                                            {% endif %}
-                                        </td> -->
-
-                                        
                                             <td class="align-middle">
                                                 <div class="d-flex flex-row justify-content-center">
                                                     {% if user.is_authenticated %}

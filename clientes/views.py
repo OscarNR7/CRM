@@ -207,32 +207,34 @@ def editar_cliente(request, id):
 
 #funcion para eliminar un cliente existente 
 @method_decorator([gerente_required], name='dispatch')
-class EliminarCliente(LoginRequiredMixin,DeleteView):
-    '''
-    Elimina un cliente existente en la base de datos
-    Args: request (HttpRequest): peticion HTTP, id (int): id del cliente
-    '''
+class EliminarCliente(LoginRequiredMixin, DeleteView):
     model = Cliente
     template_name = 'clientes/cliente_confirm_delete.html'
     success_url = reverse_lazy('clientes')
-    def delete(self, request, *args, **kwargs):
-        # Obtener el objeto cliente que se va a eliminar
+    
+    def form_valid(self, form):
         cliente = self.get_object()
-        log_user_activity(
-                user=self.request.user,
-                action="Eliminó",
-                target=f"cliente {cliente.nombre} {cliente.apellido}",
-                app_name="clientes"
-            )
         
-        # Si el cliente tiene una imagen asociada, eliminarla del sistema de archivos
-        if cliente.imagen:
-            imagen_path = os.path.join(settings.MEDIA_ROOT, cliente.imagen.name)
+        # Registrar la actividad antes de la eliminación
+        log_user_activity(
+            user=self.request.user,
+            action="Eliminó",
+            target=f"cliente {cliente.nombre} {cliente.curp}",
+            app_name="clientes"
+        )
+        
+        # Eliminar la fotografía si existe
+        if cliente.fotografia:
+            imagen_path = os.path.join(settings.MEDIA_ROOT, cliente.fotografia.name)
             if os.path.isfile(imagen_path):
                 os.remove(imagen_path)
+        # Eliminar la fotografía del aval si existe
+        if cliente.foto_aval:
+            imagen_aval_path = os.path.join(settings.MEDIA_ROOT, cliente.foto_aval.name)
+            if os.path.isfile(imagen_aval_path):
+                os.remove(imagen_aval_path)
         
-        # Eliminar el cliente
-        return super().delete(request, *args, **kwargs)
+        return super().form_valid(form)
     
 @login_required
 def informacion_cliente(request, cliente_id):
