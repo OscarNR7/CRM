@@ -144,8 +144,77 @@ class PagosClientes(LoginRequiredMixin, ListView):
     context_object_name = 'pagos_por_semana'
 
     def get_queryset(self):
-        # ... (mantener el código existente del get_queryset)
-        pass
+        user_role = self.request.user.userrole.role
+        vendedor_id = self.request.GET.get('vendedor')
+        
+        try:
+            if user_role == 'vendedor':
+                # Si es vendedor, verificar primero si existe
+                try:
+                    vendedor = Vendedor.objects.get(usuario=self.request.user)
+                    clientes = Cliente.objects.filter(vendedor=vendedor).prefetch_related(
+                        Prefetch('pagos', queryset=Pago.objects.order_by('fecha_de_pago'))
+                    )
+                except Vendedor.DoesNotExist:
+                    return {}  # Retornar diccionario vacío si no existe el vendedor
+            elif user_role in ['gerente', 'administrador']:
+                # Mantener la lógica actual para gerentes y administradores
+                if vendedor_id:
+                    clientes = Cliente.objects.filter(vendedor_id=vendedor_id).prefetch_related(
+                        Prefetch('pagos', queryset=Pago.objects.order_by('fecha_de_pago'))
+                    )
+                else:
+                    clientes = Cliente.objects.all().prefetch_related(
+                        Prefetch('pagos', queryset=Pago.objects.order_by('fecha_de_pago'))
+                    )
+            else:
+                return {}
+
+            # Si no hay clientes, retornar diccionario vacío
+            if not clientes.exists():
+                return {}
+
+            pagos_por_semana = {}
+
+            for cliente in clientes:
+                try:
+                    # Convertir la fecha de string a objeto date si es necesario
+                    if isinstance(cliente.fecha_de_firma, str):
+                        fecha = datetime.strptime(cliente.fecha_de_firma, '%d-%b-%y').date()
+                    else:
+                        fecha = cliente.fecha_de_firma
+
+                    # Obtener el año y semana ISO
+                    año_iso, semana_iso = get_iso_calendar_data(fecha)
+
+                    # Calcular las fechas de inicio y fin de la semana
+                    inicio_semana, fin_semana = get_fechas_semana(fecha)
+
+                    # Crear clave única para cada semana
+                    clave = f"{año_iso}-{semana_iso}"
+
+                    if clave not in pagos_por_semana:
+                        pagos_por_semana[clave] = {
+                            'clientes': [],
+                            'fecha_inicio': inicio_semana,
+                            'fecha_fin': fin_semana,
+                            'semana': semana_iso,
+                            'año': año_iso
+                        }
+                    pagos_por_semana[clave]['clientes'].append({
+                        'cliente': cliente,
+                        'pago': cliente.pagos.first()
+                    })
+
+                except (ValueError, AttributeError) as e:
+                    logger.error(f"Error procesando fecha para cliente {cliente.id}: {e}")
+                    continue
+
+            return dict(sorted(pagos_por_semana.items(), key=lambda x: (x[1]['año'], x[1]['semana'])))
+        except Exception as e:
+            messages.error(self.request, "Ocurrió un error al obtener los pagos.")
+            logger.error(f"Error en PagosClientes.get_queryset: {e}")
+            return {}
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
