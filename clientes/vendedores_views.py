@@ -147,11 +147,14 @@ class PagosClientes(LoginRequiredMixin, ListView):
         
         try:
             if user_role == 'vendedor':
-                # Si es vendedor, automáticamente obtener sus clientes
-                vendedor = get_object_or_404(Vendedor, usuario=self.request.user)
-                clientes = Cliente.objects.filter(vendedor=vendedor).prefetch_related(
-                    Prefetch('pagos', queryset=Pago.objects.order_by('fecha_de_pago'))
-                )
+                # Si es vendedor, verificar primero si existe
+                try:
+                    vendedor = Vendedor.objects.get(usuario=self.request.user)
+                    clientes = Cliente.objects.filter(vendedor=vendedor).prefetch_related(
+                        Prefetch('pagos', queryset=Pago.objects.order_by('fecha_de_pago'))
+                    )
+                except Vendedor.DoesNotExist:
+                    return {}  # Retornar diccionario vacío si no existe el vendedor
             elif user_role in ['gerente', 'administrador']:
                 # Mantener la lógica actual para gerentes y administradores
                 if vendedor_id:
@@ -163,6 +166,10 @@ class PagosClientes(LoginRequiredMixin, ListView):
                         Prefetch('pagos', queryset=Pago.objects.order_by('fecha_de_pago'))
                     )
             else:
+                return {}
+
+            # Si no hay clientes, retornar diccionario vacío
+            if not clientes.exists():
                 return {}
 
             pagos_por_semana = {}
@@ -228,22 +235,14 @@ class PagosClientes(LoginRequiredMixin, ListView):
             # Agregar el formulario de vendedores para el modal
             context['vendedor_form'] = VendedorForm()
         elif user_role == 'vendedor':
-            # Para vendedores, agregar su información al contexto
-            vendedor = get_object_or_404(Vendedor, usuario=self.request.user)
-            context['vendedor_seleccionado'] = vendedor
+            try:
+                vendedor = Vendedor.objects.get(usuario=self.request.user)
+                context['vendedor_seleccionado'] = vendedor
+            except Vendedor.DoesNotExist:
+                context['vendedor_seleccionado'] = None
+                messages.warning(self.request, "No se encontró información del vendedor.")
             
         return context
-
-    def get(self, request, *args, **kwargs):
-        self.object_list = self.get_queryset()
-        context = self.get_context_data()
-        
-        # Lógica para manejar la petición AJAX
-        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-            html = render_to_string('vendedores/vendedor_modal_content.html', context, request=request)
-            return HttpResponse(html)
-
-        return super().get(request, *args, **kwargs)
 
 @login_required
 @administrador_required

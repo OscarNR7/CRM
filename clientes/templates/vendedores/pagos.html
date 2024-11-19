@@ -25,14 +25,15 @@
             </form>
         {% endif %}
     </div>
-    <!--Mensaje error-->
+
+    <!--Mensajes-->
     {% if messages %}
-    <div class="alert alert-danger" role="alert">
         {% for message in messages %}
-        {{ message }}
+            <div class="alert alert-{{ message.tags }}" role="alert">
+                {{ message }}
+            </div>
         {% endfor %}
-    </div>
-    {% endif %} 
+    {% endif %}
     
     <!--Tabla clientes-->
     <div class="card">
@@ -41,64 +42,75 @@
                 <h2>Vendedor: {{ vendedor_seleccionado.nombre }}</h2>
             </div>
             <div class="card-body bg-dark bordBLR">
-                {% for clave, datos in pagos_por_semana.items %}
-                    {% if datos.clientes %}
-                        <h3 class="text-light">Semana {{ datos.semana }} : <br/> {{ datos.fecha_inicio|date:"d \d\e M"|upper }} AL {{ datos.fecha_fin|date:"d \d\e M"|upper }} DEL {{ datos.año }}</h3>
-                    {% else %}
-                        <h3 class="text-light">Semana {{ datos.semana }} : del {{ datos.año }} (sin clientes)</h3>
-                    {% endif %}
-                    <div class="table-responsive">
-
-                        <table class="table table-sm table-dark align-middle table-hover table-striped">
-                            <thead class="align-middle">
-                                <tr>
-                                    <th>Nombre del Cliente</th>
-                                    <th>Fecha de Firma</th>
-                                    <th>46 Días</th>
-                                    <th>Observaciones</th>
-                                    <th>Fecha de Pago</th>
-                                    <th>Cancelación</th>
-                                    <th>Cantidad</th>
-                                    <th>Porcentaje</th>
-                                    <th>Anticipo</th>
-                                    {% if user.is_authenticated and user.userrole.role == 'gerente' or user.userrole.role == 'administrador' %}
-                                        <th>Acciones</th>
-                                    {% endif %}
-                                </tr>
-                            </thead>
-                            <tbody class="table-group-divider">
-                                {% for item in datos.clientes %}
-                                    <tr>
-                                        <td>{{ item.cliente.nombre }}</td>
-                                        <td>{{ item.cliente.fecha_de_firma|date:"d-M-y" }}</td>
-                                        <td>{{ item.pago.F46dias|default:"-" }}</td>
-                                        <td>{{ item.pago.observaciones|default:"-" }}</td>
-                                        <td>{{ item.pago.fecha_de_pago|date:"d-M-y" }}</td>
-                                        <td>{{ item.pago.cancelacion|default:"-" }}</td>
-                                        <td>{{ item.pago.cantidad|default:"-" }}</td>
-                                        <td>{{ item.pago.porcentaje|default:"-" }}%</td>
-                                        <td>{{ item.pago.anticipo|default:"-" }}</td>
-                                        {% if user.is_authenticated and user.userrole.role == 'gerente' or user.userrole.role == 'administrador' %}
-                                            <div>
-                                                <td class="align-middle">
-                                                    <a href="{% url 'agregar_editar_pago' cliente_id=item.cliente.id vendedor_id=vendedor_seleccionado.id %}" class="btn btn-primary btncen text-nowrap w-100">
-                                                        Agregar<br/>Editar Pagos
-                                                    </a>
-                                                </td>
-                                            </div>
-                                        {% endif %}
-                                    </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
+                {% if pagos_por_semana %}
+                    {% for clave, datos in pagos_por_semana.items %}
+                        {% if datos.clientes %}
+                            <h3 class="text-light">Semana {{ datos.semana }} : <br/> {{ datos.fecha_inicio|date:"d \d\e M"|upper }} AL {{ datos.fecha_fin|date:"d \d\e M"|upper }} DEL {{ datos.año }}</h3>
+                            <div class="table-responsive">
+                                <table class="table table-sm table-dark align-middle table-hover table-striped">
+                                    <thead class="align-middle">
+                                        <tr>
+                                            <th>Nombre del Cliente</th>
+                                            <th>Fecha de Firma</th>
+                                            <th>46 Días</th>
+                                            <th>Observaciones</th>
+                                            <th>Fecha de Pago</th>
+                                            <th>Cancelación</th>
+                                            <th>Cantidad</th>
+                                            <th>Porcentaje</th>
+                                            <th>Anticipo</th>
+                                            {% if user.is_authenticated and user.userrole.role == 'gerente' or user.userrole.role == 'administrador' %}
+                                                <th>Acciones</th>
+                                            {% endif %}
+                                        </tr>
+                                    </thead>
+                                    <tbody class="table-group-divider">
+                                        {% for item in datos.clientes %}
+                                            <tr>
+                                                <td>{{ item.cliente.nombre }}</td>
+                                                <td>{{ item.cliente.fecha_de_firma|date:"d-M-y" }}</td>
+                                                <td>{{ item.pago.F46dias|default:"-" }}</td>
+                                                <td>{{ item.pago.observaciones|default:"-" }}</td>
+                                                <td>{{ item.pago.fecha_de_pago|date:"d-M-y" }}</td>
+                                                <td>{{ item.pago.cancelacion|default:"-" }}</td>
+                                                <td>{{ item.pago.cantidad|default:"-" }}</td>
+                                                <td>{{ item.pago.porcentaje|default:"-" }}%</td>
+                                                <td>{{ item.pago.anticipo|default:"-" }}</td>
+                                                {% if user.is_authenticated and user.userrole.role == 'gerente' or user.userrole.role == 'administrador' %}
+                                                    <td class="align-middle">
+                                                        <a href="{% url 'agregar_editar_pago' cliente_id=item.cliente.id vendedor_id=vendedor_seleccionado.id %}" class="btn btn-primary btncen text-nowrap w-100">
+                                                            Agregar<br/>Editar Pagos
+                                                        </a>
+                                                    </td>
+                                                {% endif %}
+                                            </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                            <hr class="border border-light border-3 opacity-75">
+                        {% endif %}
+                    {% endfor %}
+                {% else %}
+                    <div class="alert alert-info m-3">
+                        <h4 class="alert-heading">No hay pagos para mostrar</h4>
+                        {% if user.userrole.role == 'vendedor' %}
+                            <p>Actualmente no tienes clientes asignados.</p>
+                        {% else %}
+                            <p>No hay clientes registrados para este vendedor.</p>
+                        {% endif %}
                     </div>
-                    <hr class="border border-light border-3 opacity-75">
-                {% endfor %}
+                {% endif %}
             </div>
-            
         {% else %}
             <div class="card-body text-bg-dark text-center bordesC">
-                <p class="m-0">Selecciona un vendedor para ver los clientes.</p>
+                {% if user.userrole.role == 'vendedor' %}
+                    <div class="alert alert-info m-0">
+                        <p class="m-0">No se encontró información de vendedor asociada a tu cuenta.</p>
+                    </div>
+                {% else %}
+                    <p class="m-0">Selecciona un vendedor para ver los clientes.</p>
+                {% endif %}
             </div>
         {% endif %}
     </div>
@@ -118,26 +130,25 @@
         </div>
     </div>
 
-
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-        const vendedorModal = document.getElementById('vendedorModal');
-        
-        vendedorModal.addEventListener('click', function(e) {
-            if (e.target.classList.contains('vendedor-page-link')) {
-                e.preventDefault();
-                const page = e.target.getAttribute('data-page');
-                fetch(`?vendedor_page=${page}`, {
-                    headers: {
-                        'X-Requested-With': 'XMLHttpRequest'
-                    }
-                })
-                .then(response => response.text())
-                .then(html => {
-                    vendedorModal.querySelector('.modal-body').innerHTML = html;
-                });
-            }
+            const vendedorModal = document.getElementById('vendedorModal');
+            
+            vendedorModal.addEventListener('click', function(e) {
+                if (e.target.classList.contains('vendedor-page-link')) {
+                    e.preventDefault();
+                    const page = e.target.getAttribute('data-page');
+                    fetch(`?vendedor_page=${page}`, {
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest'
+                        }
+                    })
+                    .then(response => response.text())
+                    .then(html => {
+                        vendedorModal.querySelector('.modal-body').innerHTML = html;
+                    });
+                }
+            });
         });
-    });
     </script>
 {% endblock %}
