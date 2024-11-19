@@ -24,13 +24,20 @@
             </td>
             {% if user.is_authenticated and user.userrole.role == 'gerente' or user.userrole.role == 'administrador' %}
             <td>
-            
-                <button onclick="mostrarEditar('{{ vendedor.id }}', '{{ vendedor.nombre|escapejs }}')" class="btn btn-primary btn-sm">Editar</button>
-            {% elif user.is_authenticated and user.userrole.role == 'gerente' %}
-                <form action="{% url 'eliminar_vendedor' vendedor.id %}" method="post" style="display: inline;">
-                    {% csrf_token %}
-                    <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('¿Estás seguro de que deseas eliminar a este vendedor?');">Eliminar</button>
-                </form>
+                {% if user.is_authenticated %}
+                    <!-- Mostrar botón de Editar si el usuario es gerente o administrador -->
+                    {% if user.userrole.role == 'gerente' or user.userrole.role == 'administrador' %}
+                        <button onclick="mostrarEditar('{{ vendedor.id }}', '{{ vendedor.nombre|escapejs }}')" class="btn btn-primary btn-sm">Editar</button>
+                    {% endif %}
+                    
+                    <!-- Mostrar botón de Eliminar solo si el usuario es gerente -->
+                    {% if user.userrole.role == 'gerente' %}
+                        <form action="{% url 'eliminar_vendedor' vendedor.id %}" method="post" style="display: inline;">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('¿Estás seguro de que deseas eliminar a este vendedor?');">Eliminar</button>
+                        </form>
+                    {% endif %}
+                {% endif %}
             </td>
             {% endif %}
         </tr>
